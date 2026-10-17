@@ -54,6 +54,10 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     needs: analyse-test
+    # Needed to publish the rolling release below. Everything else in this
+    # workflow only reads.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
 
@@ -104,6 +108,42 @@ jobs:
           name: jk-read-n-learn-android
           path: build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
+
+      # Workflow artifacts need a GitHub login and expire after 90 days, which
+      # is no good for a link you want to open on a tablet months from now. A
+      # release asset is permanent, public, and downloadable straight from the
+      # tablet's browser.
+      - name: Rename the APK for a readable download link
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/jk-read-n-learn.apk
+
+      - name: Publish the APK as a rolling release
+        uses: softprops/action-gh-release@v2
+        with:
+          # Deliberately not a version number. A fixed tag means the download
+          # URL never changes, so the link can be bookmarked on a tablet.
+          tag_name: latest
+          name: Latest build
+          make_latest: true
+          body: |
+            Built automatically from commit `${{ github.sha }}`.
+
+            **To install on an Android tablet:** open this page on the tablet and
+            tap `jk-read-n-learn.apk` below. Android will ask you to allow
+            installing unknown apps the first time.
+
+            Signed with the debug key, so this is for testing and family use —
+            it cannot be published to the Play Store.
+          files: build/app/outputs/flutter-apk/jk-read-n-learn.apk
+
+      - name: Point at the download
+        run: |
+          {
+            echo "### Android APK"
+            echo
+            echo "https://github.com/${{ github.repository }}/releases/latest/download/jk-read-n-learn.apk"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   ios:
     name: Build iOS (unsigned)

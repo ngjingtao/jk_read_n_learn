@@ -142,6 +142,23 @@ looks for `Dockerfile` at the repository root, and a missing one is the cause of
 > 30–60 seconds. For a child who wants to read *right now*, that is a bad first
 > impression — which is why Pages is the recommendation.
 
+### Option C — just install the APK (best for actually testing the microphone)
+
+The Android APK is built and published on every push:
+
+**https://github.com/ngjingtao/jk_read_n_learn/releases/latest/download/jk-read-n-learn.apk**
+
+Open that link **on the Android tablet** and tap install. Android will ask you to
+allow installing unknown apps the first time — that prompt is normal for an app
+that did not come from the Play Store.
+
+> This APK is signed with the **debug key**, so it is for testing and family use.
+> It cannot be published to the Play Store. Anyone with the link can download it,
+> because the repository is public.
+
+iOS has no equivalent: installing on an iPad needs an Apple developer account and
+code signing. Use the web build there, or a Mac with Xcode.
+
 ### Read this before relying on the web version
 
 The web build is a **demo, not the product**. Three things differ from the
