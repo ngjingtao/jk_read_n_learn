@@ -115,13 +115,16 @@ in the browser, no app store, no signing.
 
 Free, no account to create, HTTPS by default, and no cold start.
 
-1. Push to `main`. The `deploy-pages` job builds and publishes automatically,
-   and enables Pages on its first run.
-2. The URL is `https://<user>.github.io/<repo>/`.
+**One-time setup:** repository → **Settings** → **Pages** → **Build and
+deployment** → **Source: GitHub Actions**.
 
-If the job fails on the first attempt, enable it once by hand: repository →
-**Settings** → **Pages** → **Build and deployment** → **Source: GitHub
-Actions**, then re-run the job.
+This step cannot be automated. Creating a Pages site requires repository-admin
+rights that `GITHUB_TOKEN` never has, so a workflow that tries gets
+`Resource not accessible by integration`. Until it is done, the
+`Deploy to GitHub Pages` job fails with that message; after it, the job is green
+on every push.
+
+Then the URL is `https://<user>.github.io/<repo>/`.
 
 The build passes `--base-href /<repo>/`, because Pages serves from a subpath.
 Without it the page loads and then shows a blank screen.
