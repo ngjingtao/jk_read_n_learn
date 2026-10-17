@@ -115,10 +115,13 @@ in the browser, no app store, no signing.
 
 Free, no account to create, HTTPS by default, and no cold start.
 
-1. Repository → **Settings** → **Pages** → **Build and deployment** →
-   **Source: GitHub Actions**.
-2. Push to `main`. The `deploy-pages` job builds and publishes automatically.
-3. The URL is `https://<user>.github.io/<repo>/`.
+1. Push to `main`. The `deploy-pages` job builds and publishes automatically,
+   and enables Pages on its first run.
+2. The URL is `https://<user>.github.io/<repo>/`.
+
+If the job fails on the first attempt, enable it once by hand: repository →
+**Settings** → **Pages** → **Build and deployment** → **Source: GitHub
+Actions**, then re-run the job.
 
 The build passes `--base-href /<repo>/`, because Pages serves from a subpath.
 Without it the page loads and then shows a blank screen.
