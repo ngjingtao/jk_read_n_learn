@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../l10n/generated/app_localizations.dart';
+import '../state/progress_state.dart';
 import '../state/settings_state.dart';
 import '../state/wallet_state.dart';
 import 'diagnostics_screen.dart';
@@ -77,6 +78,61 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
+          _SectionHeader(title: l10n.settingsComfort),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text(l10n.settingsTextSize),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final size in TextSize.values)
+                          ChoiceChip(
+                            label: Text(l10n.textSizeName(size)),
+                            selected: settings.textSize == size,
+                            onSelected: (_) => settings.setTextSize(size),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  title: Text(l10n.settingsLineSpacing),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final spacing in LineSpacing.values)
+                          ChoiceChip(
+                            label: Text(l10n.lineSpacingName(spacing)),
+                            selected: settings.lineSpacing == spacing,
+                            onSelected: (_) => settings.setLineSpacing(spacing),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const Divider(height: 1),
+                SwitchListTile(
+                  value: settings.reduceMotion,
+                  onChanged: settings.setReduceMotion,
+                  title: Text(l10n.settingsReduceMotion),
+                  subtitle: Text(
+                    l10n.settingsReduceMotionSubtitle,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  isThreeLine: true,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
           _SectionHeader(title: l10n.settingsAbout),
           Card(
             child: Padding(
@@ -99,6 +155,14 @@ class SettingsScreen extends StatelessWidget {
                   Text(
                     '${l10n.walletTitle}: '
                     '${context.watch<WalletState>().balance.label}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${l10n.streakBest(context.watch<ProgressState>().longestStreak)}'
+                    ' · ${l10n.progressAttempts(context.watch<ProgressState>().totalReadingDays)}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

@@ -16,7 +16,7 @@ Melayu.
 ## Current status
 
 A working **vertical slice** with the full loop, plus the first round of
-device-reliability work. `flutter analyze` is clean and **76 tests** pass.
+device-reliability work. `flutter analyze` is clean and **107 tests** pass.
 
 | Feature | Status |
 | --- | --- |
@@ -27,6 +27,10 @@ device-reliability work. `flutter analyze` is clean and **76 tests** pass.
 | Word-level marking (correct / close / missed / added) | ✅ Working |
 | Points and JKD reward, saved on device | ✅ Working |
 | Reward history / savings book | ✅ Working |
+| Reward shop — spend JKD on a sticker collection | ✅ Working |
+| Reading streaks (current and longest) | ✅ Working |
+| Per-passage records (attempts, best accuracy, best speed) | ✅ Working |
+| Reading comfort: text size, line spacing, reduce motion | ✅ Working |
 | Interface in Chinese, English, Bahasa Melayu | ✅ Working |
 | Microphone permission handling, with a route to system settings | ✅ Working |
 | Auto-finish when the child stops talking | ✅ Working |
@@ -92,7 +96,7 @@ project whose real targets are iPad and Android.
 
 | Job | Runner | Proves |
 | --- | --- | --- |
-| `analyse-test` | ubuntu | Analyzer is clean, 76 tests pass, localisations are up to date |
+| `analyse-test` | ubuntu | Analyzer is clean, 107 tests pass, localisations are up to date |
 | `android` | ubuntu | Manifest, Gradle config and every plugin link; uploads an APK |
 | `ios` | macos | Info.plist usage strings and CocoaPods link |
 | `web` | ubuntu | Full Dart compile; uploads a browsable build |
@@ -158,6 +162,35 @@ the UI.
 
 ---
 
+## The JKD economy
+
+A reward currency that can only ever grow stops working after about a week, so
+earning and spending are both real.
+
+**Earning.** Marks convert to JKD and land in a savings book with a full ledger.
+Entries are signed, so earnings and purchases share one history.
+
+**Spending.** The reward shop sells a ladder of stickers, from `0.50 JKD` to
+`20.00 JKD`. Prices are calibrated against the reward rate — the cheapest is
+about one clean 60-word passage, so a child sees the loop close the first time
+they read well. Each reward is owned once, and the collection sits at the top of
+the shop.
+
+**Streaks.** Consecutive days with at least one reading session. A streak is not
+broken at midnight: if a child has not read *yet* today but read yesterday, it
+still counts, because resetting it while they are asleep would be absurd. The
+best-ever streak is kept separately.
+
+**Records.** Every passage remembers how many times it has been read, the best
+accuracy, and the best speed. Beating your own best shows a banner — but only
+beating it, never a first attempt, because celebrating an improvement on nothing
+is how a reward stops meaning anything.
+
+The catalogue prices are considered guesses, not measurements. Expect to retune
+them against real children; see `docs/ROADMAP.md` Phase 6.
+
+---
+
 ## Interface language vs passage language
 
 These are two independent choices, and confusing them would be a real bug:
@@ -184,6 +217,7 @@ lib/
     app_language.dart               Passage languages: en / zh / ms
     essay.dart                      A passage
     money.dart                      JKD, stored as integer hundredths
+    reward.dart                     The sticker catalogue you spend JKD on
     scoring_models.dart             EssayToken, WordStatus, ScoreGrade, ScoreResult
   data/sample_essays.dart           Bundled passages + hearing-test sentences
   l10n/
@@ -196,19 +230,23 @@ lib/
     voice_separator.dart            Voice-isolation seam (see docs/VOICE_ISOLATION.md)
     scoring/
       text_utils.dart               Tokenising, normalisation, similarity
+      phonetic.dart                 Spelling-to-sound skeleton for English
+      token_comparator.dart         Chooses how two words are compared
       aligner.dart                  Needleman–Wunsch alignment
       reading_scorer.dart           Words in, marks and JKD out
   state/
     wallet_state.dart               JKD balance and ledger, persisted
-    settings_state.dart             Interface language, speech privacy, persisted
+    progress_state.dart             Streaks, per-passage records, collection
+    settings_state.dart             Language, speech, reading comfort
     reading_session_controller.dart One reading attempt, start to finish
   ui/
     l10n_extensions.dart            Domain enums → translated text
-    home_screen.dart                Language picker and passage list
+    home_screen.dart                Language picker, streak, passage list
     reader_screen.dart              The passage, listening, "All done"
-    result_screen.dart              Marks, colour-coded passage, reward
+    result_screen.dart              Marks, records, streak, reward
     wallet_screen.dart              Savings book
-    settings_screen.dart            Language, speech settings, about
+    shop_screen.dart                Spend JKD on stickers
+    settings_screen.dart            Language, speech, reading comfort, about
     diagnostics_screen.dart         Hearing test
     widgets/essay_text.dart         Tappable, colour-codable passage text
 test/                               Unit, widget and localisation tests
@@ -227,7 +265,7 @@ channel.
 
 ## Not yet verified
 
-The Dart code is proven: `flutter analyze` is clean, 76 tests pass, and
+The Dart code is proven: `flutter analyze` is clean, 107 tests pass, and
 `flutter build web --release` completes with exit code 0.
 
 What is **not** verified is anything native:

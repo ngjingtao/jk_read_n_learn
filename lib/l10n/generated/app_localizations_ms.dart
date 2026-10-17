@@ -257,6 +257,134 @@ class AppLocalizationsMs extends AppLocalizations {
   String get settingsAbout => 'Perihal';
 
   @override
+  String get settingsComfort => 'Keselesaan membaca';
+
+  @override
+  String get settingsTextSize => 'Saiz teks';
+
+  @override
+  String get settingsTextSizeSmall => 'Kecil';
+
+  @override
+  String get settingsTextSizeNormal => 'Biasa';
+
+  @override
+  String get settingsTextSizeLarge => 'Besar';
+
+  @override
+  String get settingsTextSizeExtraLarge => 'Sangat besar';
+
+  @override
+  String get settingsLineSpacing => 'Jarak baris';
+
+  @override
+  String get settingsLineSpacingNormal => 'Biasa';
+
+  @override
+  String get settingsLineSpacingWide => 'Lebar';
+
+  @override
+  String get settingsLineSpacingExtraWide => 'Sangat lebar';
+
+  @override
+  String get settingsReduceMotion => 'Kurangkan gerakan';
+
+  @override
+  String get settingsReduceMotionSubtitle =>
+      'Hentikan titik berdenyut semasa mendengar. Pemasa di sebelahnya masih menunjukkan apa yang berlaku.';
+
+  @override
+  String streakDays(int days) {
+    return '$days hari berturut-turut';
+  }
+
+  @override
+  String get streakNone => 'Baca hari ini untuk mula berturut-turut';
+
+  @override
+  String streakBest(int days) {
+    return 'Terbaik: $days hari';
+  }
+
+  @override
+  String get streakTooltip => 'Hari berturut-turut anda membaca';
+
+  @override
+  String get shopTitle => 'Kedai ganjaran';
+
+  @override
+  String get shopSubtitle => 'Belanjakan JKD anda untuk pelekat koleksi.';
+
+  @override
+  String get shopOwned => 'Dimiliki';
+
+  @override
+  String get shopBuy => 'Beli';
+
+  @override
+  String get shopNotEnough => 'JKD belum cukup';
+
+  @override
+  String get shopCollection => 'Koleksi saya';
+
+  @override
+  String get shopCollectionEmpty =>
+      'Belum ada koleksi. Baca satu petikan, kemudian kembali.';
+
+  @override
+  String shopBought(String name) {
+    return 'Anda membeli $name';
+  }
+
+  @override
+  String get rewardStar => 'Bintang';
+
+  @override
+  String get rewardHeart => 'Hati';
+
+  @override
+  String get rewardRocket => 'Roket';
+
+  @override
+  String get rewardRainbow => 'Pelangi';
+
+  @override
+  String get rewardPanda => 'Panda';
+
+  @override
+  String get rewardDragon => 'Naga';
+
+  @override
+  String get rewardCrown => 'Mahkota';
+
+  @override
+  String get rewardTrophy => 'Piala';
+
+  @override
+  String get progressTitle => 'Kemajuan anda';
+
+  @override
+  String progressAttempts(int count) {
+    return 'Dibaca $count kali';
+  }
+
+  @override
+  String progressBestAccuracy(int percent) {
+    return 'Terbaik: $percent%';
+  }
+
+  @override
+  String progressBestSpeed(int wpm) {
+    return 'Laju terbaik: $wpm perkataan seminit';
+  }
+
+  @override
+  String get progressNewRecord => 'Rekod baharu untuk petikan ini!';
+
+  @override
+  String get progressNever => 'Belum dibaca';
+
+  @override
   String get languageEnglish => 'English';
 
   @override

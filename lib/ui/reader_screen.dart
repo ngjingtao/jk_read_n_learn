@@ -9,6 +9,7 @@ import '../services/permission_service.dart';
 import '../services/speech_service.dart';
 import '../services/tts_service.dart';
 import '../services/voice_separator.dart';
+import '../state/progress_state.dart';
 import '../state/reading_session_controller.dart';
 import '../state/settings_state.dart';
 import '../state/wallet_state.dart';
@@ -47,6 +48,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
       speech: context.read<SpeechRecogniser>(),
       permissions: context.read<MicrophonePermissions>(),
       wallet: context.read<WalletState>(),
+      progress: context.read<ProgressState>(),
       settings: context.read<SettingsState>(),
       voiceSeparation: context.read<VoiceSeparationRegistry>(),
     )..addListener(_onControllerChanged);
@@ -108,6 +110,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                     child: EssayText(
                       text: widget.essay.text,
                       language: widget.essay.language,
+                      lineHeight: context.watch<SettingsState>().lineSpacing.height,
                       onWordTap: _controller.speakWord,
                     ),
                   ),
@@ -183,7 +186,13 @@ class _ReaderScreenState extends State<ReaderScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _PulsingDot(color: theme.colorScheme.error),
+                _PulsingDot(
+                  color: theme.colorScheme.error,
+                  // Respecting the preference here matters: the timer text beside
+                  // the dot carries the same information, so turning motion off
+                  // costs the child nothing.
+                  animate: !context.watch<SettingsState>().reduceMotion,
+                ),
                 const SizedBox(width: 10),
                 Text(
                   l10n.listeningStatus(_formatDuration(seconds)),
@@ -352,7 +361,11 @@ class _ReaderScreenState extends State<ReaderScreen> {
 
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => ResultScreen(essay: widget.essay, result: result),
+        builder: (_) => ResultScreen(
+          essay: widget.essay,
+          result: result,
+          isNewRecord: _controller.isNewRecord,
+        ),
       ),
     );
 
@@ -430,9 +443,12 @@ class _ReaderScreenState extends State<ReaderScreen> {
 
 /// A small blinking dot used as a "recording" indicator.
 class _PulsingDot extends StatefulWidget {
-  const _PulsingDot({required this.color});
+  const _PulsingDot({required this.color, this.animate = true});
 
   final Color color;
+
+  /// When false the dot is drawn steadily instead of pulsing.
+  final bool animate;
 
   @override
   State<_PulsingDot> createState() => _PulsingDotState();
@@ -443,7 +459,25 @@ class _PulsingDotState extends State<_PulsingDot>
   late final AnimationController _animation = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 800),
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.animate) _animation.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(_PulsingDot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animate && !_animation.isAnimating) {
+      _animation.repeat(reverse: true);
+    } else if (!widget.animate && _animation.isAnimating) {
+      _animation
+        ..stop()
+        ..value = 1;
+    }
+  }
 
   @override
   void dispose() {
@@ -453,16 +487,20 @@ class _PulsingDotState extends State<_PulsingDot>
 
   @override
   Widget build(BuildContext context) {
+    final dot = Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: widget.color,
+        shape: BoxShape.circle,
+      ),
+    );
+
+    if (!widget.animate) return dot;
+
     return FadeTransition(
       opacity: Tween<double>(begin: 0.3, end: 1).animate(_animation),
-      child: Container(
-        width: 12,
-        height: 12,
-        decoration: BoxDecoration(
-          color: widget.color,
-          shape: BoxShape.circle,
-        ),
-      ),
+      child: dot,
     );
   }
 }

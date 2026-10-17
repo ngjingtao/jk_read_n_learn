@@ -5,30 +5,46 @@ import '../l10n/generated/app_localizations.dart';
 import '../models/essay.dart';
 import '../models/scoring_models.dart';
 import '../services/tts_service.dart';
+import '../state/progress_state.dart';
+import '../state/settings_state.dart';
 import 'l10n_extensions.dart';
 import 'widgets/essay_text.dart';
 
 /// Marks for one attempt, with the passage colour-coded word by word.
 class ResultScreen extends StatelessWidget {
-  const ResultScreen({super.key, required this.essay, required this.result});
+  const ResultScreen({
+    super.key,
+    required this.essay,
+    required this.result,
+    this.isNewRecord = false,
+  });
 
   final Essay essay;
   final ScoreResult result;
+
+  /// Whether the attempt beat the child's previous best on this passage.
+  final bool isNewRecord;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final tts = context.read<Speaker>();
+    final settings = context.watch<SettingsState>();
+    final progress = context.watch<ProgressState>().progressFor(essay.id);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.resultTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          _SummaryCard(result: result),
+          _SummaryCard(result: result, isNewRecord: isNewRecord),
           const SizedBox(height: 16),
           _RewardCard(result: result),
+          if (progress != null) ...[
+            const SizedBox(height: 16),
+            _ProgressCard(progress: progress, streak: context.watch<ProgressState>().currentStreak),
+          ],
           const SizedBox(height: 16),
           _BreakdownCard(result: result),
           const SizedBox(height: 20),
@@ -52,6 +68,7 @@ class ResultScreen extends StatelessWidget {
               child: EssayText(
                 text: essay.text,
                 language: essay.language,
+                lineHeight: settings.lineSpacing.height,
                 statuses: [for (final word in result.alignment) word.status],
                 onWordTap: (word) => tts.speakWord(word, essay.language),
               ),
@@ -83,9 +100,10 @@ class ResultScreen extends StatelessWidget {
 }
 
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.result});
+  const _SummaryCard({required this.result, required this.isNewRecord});
 
   final ScoreResult result;
+  final bool isNewRecord;
 
   @override
   Widget build(BuildContext context) {
@@ -96,77 +114,176 @@ class _SummaryCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(22),
-        child: Row(
+        child: Column(
           children: [
-            SizedBox(
-              width: 96,
-              height: 96,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    width: 96,
-                    height: 96,
-                    child: CircularProgressIndicator(
-                      value: result.accuracy,
-                      strokeWidth: 9,
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
+            Row(
+              children: [
+                SizedBox(
+                  width: 96,
+                  height: 96,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Text(
-                        '$percent%',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
+                      SizedBox(
+                        width: 96,
+                        height: 96,
+                        child: CircularProgressIndicator(
+                          value: result.accuracy,
+                          strokeWidth: 9,
+                          backgroundColor:
+                              theme.colorScheme.surfaceContainerHighest,
                         ),
                       ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '$percent%',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            l10n.resultAccurate,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        l10n.resultAccurate,
-                        style: theme.textTheme.labelSmall?.copyWith(
+                        l10n.gradeLabel(result.grade),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.resultSummary(
+                          result.correctWords,
+                          result.totalWords,
+                          result.duration.inSeconds,
+                        ),
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.resultWordsPerMinute(result.wordsPerMinute.round()),
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.gradeLabel(result.grade),
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: theme.colorScheme.primary,
+            if (isNewRecord) ...[
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF3CD),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Text('🎉', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        l10n.progressNewRecord,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF7A5B00),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    l10n.resultSummary(
-                      result.correctWords,
-                      result.totalWords,
-                      result.duration.inSeconds,
-                    ),
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.resultWordsPerMinute(result.wordsPerMinute.round()),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Long-term progress for this passage, plus the current streak.
+///
+/// Shown next to the reward on purpose: a child who scored badly still sees that
+/// they are on a run of days, which is the thing that keeps them coming back.
+class _ProgressCard extends StatelessWidget {
+  const _ProgressCard({required this.progress, required this.streak});
+
+  final EssayProgress progress;
+  final int streak;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        child: Column(
+          children: [
+            _ProgressRow(
+              icon: Icons.repeat,
+              label: l10n.progressAttempts(progress.attempts),
+            ),
+            const SizedBox(height: 10),
+            _ProgressRow(
+              icon: Icons.emoji_events_outlined,
+              label: l10n.progressBestAccuracy(
+                (progress.bestAccuracy * 100).round(),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _ProgressRow(
+              icon: Icons.speed,
+              label: l10n.progressBestSpeed(progress.bestWordsPerMinute.round()),
+            ),
+            if (streak > 0) ...[
+              const Divider(height: 24),
+              _ProgressRow(
+                icon: Icons.local_fire_department_outlined,
+                label: l10n.streakDays(streak),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressRow extends StatelessWidget {
+  const _ProgressRow({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+        const SizedBox(width: 12),
+        Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
+      ],
     );
   }
 }

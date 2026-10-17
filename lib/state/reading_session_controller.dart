@@ -8,6 +8,7 @@ import '../services/scoring/reading_scorer.dart';
 import '../services/speech_service.dart';
 import '../services/tts_service.dart';
 import '../services/voice_separator.dart';
+import 'progress_state.dart';
 import 'settings_state.dart';
 import 'wallet_state.dart';
 
@@ -67,6 +68,7 @@ class ReadingSessionController extends ChangeNotifier {
     required this.speech,
     required this.permissions,
     required this.wallet,
+    required this.progress,
     required this.settings,
     required this.voiceSeparation,
     this.scorer = const ReadingScorer(),
@@ -77,6 +79,7 @@ class ReadingSessionController extends ChangeNotifier {
   final SpeechRecogniser speech;
   final MicrophonePermissions permissions;
   final WalletState wallet;
+  final ProgressState progress;
   final SettingsState settings;
   final VoiceSeparationRegistry voiceSeparation;
   final ReadingScorer scorer;
@@ -89,6 +92,7 @@ class ReadingSessionController extends ChangeNotifier {
   ReadingError? _error;
   bool _isSpeaking = false;
   bool _disposed = false;
+  bool _isNewRecord = false;
 
   ReadingPhase get phase => _phase;
 
@@ -218,10 +222,20 @@ class ReadingSessionController extends ChangeNotifier {
       ),
     );
 
+    // Progress is recorded after the reward, so a failure to save progress can
+    // never cost the child the JKD they already earned.
+    _isNewRecord = await progress.recordSession(essay: essay, result: result);
+
     _result = result;
     _phase = ReadingPhase.finished;
     _notify();
   }
+
+  /// Whether this attempt beat the child's previous best on this passage.
+  ///
+  /// `false` for a first attempt: improving on nothing is not a record, and
+  /// claiming otherwise would make the celebration meaningless.
+  bool get isNewRecord => _isNewRecord;
 
   /// Abandons the attempt without marking or paying out.
   Future<void> cancelListening() async {
@@ -238,6 +252,7 @@ class ReadingSessionController extends ChangeNotifier {
     _liveTranscript = '';
     _result = null;
     _error = null;
+    _isNewRecord = false;
     _phase = ReadingPhase.ready;
     _notify();
   }

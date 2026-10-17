@@ -6,10 +6,12 @@ import '../l10n/generated/app_localizations.dart';
 import '../models/app_language.dart';
 import '../models/essay.dart';
 import '../services/scoring/text_utils.dart';
+import '../state/progress_state.dart';
 import '../state/wallet_state.dart';
 import 'l10n_extensions.dart';
 import 'reader_screen.dart';
 import 'settings_screen.dart';
+import 'shop_screen.dart';
 import 'wallet_screen.dart';
 
 /// Picks a language and a passage. The child's JKD balance sits in the app bar.
@@ -55,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
             selected: _language,
             onChanged: (language) => setState(() => _language = language),
           ),
+          const _MotivationRow(),
           if (!wallet.isLoaded)
             const LinearProgressIndicator(minHeight: 2)
           else
@@ -167,6 +170,8 @@ class _EssayCard extends StatelessWidget {
     final meta = '${l10n.standardLabel(essay.gradeLevel)}'
         ' · ${l10n.unitFor(essay.language.tokenMode, wordCount)}';
 
+    final progress = context.watch<ProgressState>().progressFor(essay.id);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
@@ -212,6 +217,17 @@ class _EssayCard extends StatelessWidget {
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
+                      if (progress != null) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          '${l10n.progressAttempts(progress.attempts)} · '
+                          '${l10n.progressBestAccuracy((progress.bestAccuracy * 100).round())}',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -223,6 +239,102 @@ class _EssayCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Streak and reward-shop entry point.
+///
+/// Sits above the passage list rather than in the app bar, because both of these
+/// are for the child to tap, not for a parent to find in a menu.
+class _MotivationRow extends StatelessWidget {
+  const _MotivationRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final progress = context.watch<ProgressState>();
+    final streak = progress.currentStreak;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: streak > 0
+                    ? const Color(0xFFFFF3CD)
+                    : theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.local_fire_department,
+                    size: 20,
+                    color: streak > 0
+                        ? const Color(0xFFE65100)
+                        : theme.colorScheme.outline,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Tooltip(
+                      message: l10n.streakTooltip,
+                      child: Text(
+                        streak > 0
+                            ? l10n.streakDays(streak)
+                            : l10n.streakNone,
+                        maxLines: 2,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: streak > 0
+                              ? const Color(0xFF7A5B00)
+                              : theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const ShopScreen()),
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    const Text('🎁', style: TextStyle(fontSize: 18)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.shopTitle,
+                        maxLines: 2,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

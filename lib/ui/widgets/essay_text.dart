@@ -18,6 +18,7 @@ class EssayText extends StatefulWidget {
     this.onWordTap,
     this.statuses,
     this.fontSize,
+    this.lineHeight = 1.9,
     this.highlight = true,
   });
 
@@ -31,6 +32,13 @@ class EssayText extends StatefulWidget {
   final List<WordStatus>? statuses;
 
   final double? fontSize;
+
+  /// Multiplier applied to the font size, as Flutter's `TextStyle.height`.
+  ///
+  /// Passed in rather than read from `SettingsState` so the widget stays usable
+  /// without a provider above it — which is what lets it be widget-tested on its
+  /// own, and is why the reading-comfort settings can be tested at all.
+  final double lineHeight;
 
   /// Whether to paint status backgrounds. Turn off for a neutral re-read.
   final bool highlight;
@@ -97,7 +105,7 @@ class _EssayTextState extends State<EssayText> {
           text: token.display,
           recognizer: recogniser,
           style: _wordStyle(
-            base: TextStyle(fontSize: baseFontSize, height: 1.9),
+            base: TextStyle(fontSize: baseFontSize, height: widget.lineHeight),
             status: widget.highlight ? status : null,
             scheme: scheme,
             tappable: widget.onWordTap != null,
@@ -110,7 +118,7 @@ class _EssayTextState extends State<EssayText> {
       TextSpan(children: spans),
       style: TextStyle(
         fontSize: baseFontSize,
-        height: 1.9,
+        height: widget.lineHeight,
         color: scheme.onSurface,
       ),
     );

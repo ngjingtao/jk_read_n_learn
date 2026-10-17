@@ -268,6 +268,146 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAbout => 'About';
 
   @override
+  String get settingsComfort => 'Reading comfort';
+
+  @override
+  String get settingsTextSize => 'Text size';
+
+  @override
+  String get settingsTextSizeSmall => 'Small';
+
+  @override
+  String get settingsTextSizeNormal => 'Normal';
+
+  @override
+  String get settingsTextSizeLarge => 'Large';
+
+  @override
+  String get settingsTextSizeExtraLarge => 'Extra large';
+
+  @override
+  String get settingsLineSpacing => 'Line spacing';
+
+  @override
+  String get settingsLineSpacingNormal => 'Normal';
+
+  @override
+  String get settingsLineSpacingWide => 'Wide';
+
+  @override
+  String get settingsLineSpacingExtraWide => 'Extra wide';
+
+  @override
+  String get settingsReduceMotion => 'Reduce motion';
+
+  @override
+  String get settingsReduceMotionSubtitle =>
+      'Stops the pulsing listening indicator. The timer beside it still shows what is happening.';
+
+  @override
+  String streakDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days day streak',
+      one: '1 day streak',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get streakNone => 'Read today to start a streak';
+
+  @override
+  String streakBest(int days) {
+    return 'Best: $days days';
+  }
+
+  @override
+  String get streakTooltip => 'Days in a row you have read';
+
+  @override
+  String get shopTitle => 'Reward shop';
+
+  @override
+  String get shopSubtitle => 'Spend your JKD on stickers for your collection.';
+
+  @override
+  String get shopOwned => 'Owned';
+
+  @override
+  String get shopBuy => 'Buy';
+
+  @override
+  String get shopNotEnough => 'Not enough JKD yet';
+
+  @override
+  String get shopCollection => 'My collection';
+
+  @override
+  String get shopCollectionEmpty =>
+      'Nothing collected yet. Read a passage, then come back.';
+
+  @override
+  String shopBought(String name) {
+    return 'You bought $name';
+  }
+
+  @override
+  String get rewardStar => 'Star';
+
+  @override
+  String get rewardHeart => 'Heart';
+
+  @override
+  String get rewardRocket => 'Rocket';
+
+  @override
+  String get rewardRainbow => 'Rainbow';
+
+  @override
+  String get rewardPanda => 'Panda';
+
+  @override
+  String get rewardDragon => 'Dragon';
+
+  @override
+  String get rewardCrown => 'Crown';
+
+  @override
+  String get rewardTrophy => 'Trophy';
+
+  @override
+  String get progressTitle => 'Your progress';
+
+  @override
+  String progressAttempts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Read $count times',
+      one: 'Read once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String progressBestAccuracy(int percent) {
+    return 'Best: $percent%';
+  }
+
+  @override
+  String progressBestSpeed(int wpm) {
+    return 'Best speed: $wpm words per minute';
+  }
+
+  @override
+  String get progressNewRecord => 'A new best for this passage!';
+
+  @override
+  String get progressNever => 'Not read yet';
+
+  @override
   String get languageEnglish => 'English';
 
   @override

@@ -14,13 +14,14 @@ class JkdTransaction {
     this.essayId,
     this.accuracy,
     this.points,
+    this.rewardId,
   });
 
   /// What earned the reward, e.g. `My Morning Garden`.
   final String label;
 
-  /// Always positive today. Kept signed so spending can be added later without
-  /// a migration — a shop for stickers and avatars is an obvious next step.
+  /// Signed: positive for earnings, negative for spending. Kept signed so a
+  /// single ledger covers both, and the history screen can show either.
   final Jkd amount;
 
   final DateTime at;
@@ -32,6 +33,10 @@ class JkdTransaction {
 
   final int? points;
 
+  /// Set when this entry is a purchase, so the UI can render the reward's name
+  /// in whatever language is active *now* rather than the one it was bought in.
+  final String? rewardId;
+
   Map<String, dynamic> toJson() => {
         'label': label,
         'amount': amount.hundredths,
@@ -39,6 +44,7 @@ class JkdTransaction {
         if (essayId != null) 'essayId': essayId,
         if (accuracy != null) 'accuracy': accuracy,
         if (points != null) 'points': points,
+        if (rewardId != null) 'rewardId': rewardId,
       };
 
   static JkdTransaction fromJson(Map<String, dynamic> json) {
@@ -49,6 +55,7 @@ class JkdTransaction {
       essayId: json['essayId'] as String?,
       accuracy: (json['accuracy'] as num?)?.toDouble(),
       points: json['points'] as int?,
+      rewardId: json['rewardId'] as String?,
     );
   }
 }
@@ -120,6 +127,30 @@ class WalletState extends ChangeNotifier {
     );
 
     notifyListeners();
+  }
+
+  /// Spends [amount], recording it as a negative entry in the ledger.
+  ///
+  /// Returns `false` — and changes nothing — when the balance is too low. The
+  /// check and the debit happen in one synchronous step before any `await`, so
+  /// a double-tap on a Buy button cannot overdraw the balance.
+  Future<bool> spend(
+    Jkd amount, {
+    required String label,
+    String? rewardId,
+  }) async {
+    if (amount.hundredths <= 0) return false;
+    if (_balance.hundredths < amount.hundredths) return false;
+
+    await credit(
+      JkdTransaction(
+        label: label,
+        amount: Jkd(-amount.hundredths),
+        at: DateTime.now(),
+        rewardId: rewardId,
+      ),
+    );
+    return true;
   }
 
   /// Wipes the wallet. For a "start over" option and for debugging.

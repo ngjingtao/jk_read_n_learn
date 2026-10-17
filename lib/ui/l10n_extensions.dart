@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../models/app_language.dart';
+import '../models/reward.dart';
 import '../models/scoring_models.dart';
 import '../services/voice_separator.dart';
 import '../state/reading_session_controller.dart';
@@ -89,5 +90,41 @@ extension AppLocalizationsX on AppLocalizations {
       switch (separator.id) {
         'passthrough' => voiceStrategyPassthroughDescription,
         _ => separator.description,
+      };
+
+  /// Display name for a reward.
+  ///
+  /// Falls back to the raw id, which is ugly but visible — an untranslated
+  /// reward should be obvious in review rather than silently showing English.
+  String rewardName(Reward reward) => switch (reward.id) {
+        'star' => rewardStar,
+        'heart' => rewardHeart,
+        'rocket' => rewardRocket,
+        'rainbow' => rewardRainbow,
+        'panda' => rewardPanda,
+        'dragon' => rewardDragon,
+        'crown' => rewardCrown,
+        'trophy' => rewardTrophy,
+        _ => reward.id,
+      };
+
+  /// Display name for a reward id from the ledger, where the catalogue may no
+  /// longer contain it.
+  String rewardNameById(String id) {
+    final reward = rewardById(id);
+    return reward == null ? id : rewardName(reward);
+  }
+
+  String textSizeName(TextSize size) => switch (size) {
+        TextSize.small => settingsTextSizeSmall,
+        TextSize.normal => settingsTextSizeNormal,
+        TextSize.large => settingsTextSizeLarge,
+        TextSize.extraLarge => settingsTextSizeExtraLarge,
+      };
+
+  String lineSpacingName(LineSpacing spacing) => switch (spacing) {
+        LineSpacing.normal => settingsLineSpacingNormal,
+        LineSpacing.wide => settingsLineSpacingWide,
+        LineSpacing.extraWide => settingsLineSpacingExtraWide,
       };
 }

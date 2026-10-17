@@ -103,15 +103,24 @@ transcript and corrupts the marks. The seam exists; the DSP does not. See
 
 ## Phase 6 — Motivation and progression
 
-- [ ] Something to **spend** JKD on: stickers, avatars, passage unlocks. A
-      currency that can only accumulate stops being a reward.
-- [ ] Streaks and daily goals.
-- [ ] Progress over time: accuracy and words-per-minute trends per passage.
+- [x] Something to **spend** JKD on: a reward shop with a ladder of stickers,
+      and a collection. Prices calibrated so the cheapest reward is about one
+      good reading.
+- [x] Streaks, with the current and best-ever runs. Deliberately not reset at
+      midnight.
+- [x] Per-passage progress: attempts, best accuracy, best speed, and a banner
+      for beating your own record.
+- [x] Reading comfort: text size, line spacing, and a reduce-motion switch.
 - [ ] Tune the reward curve against real data. The current numbers (10 points
-      per correct word, 25 bonus, 100 points = 1 JKD) are a considered guess and
-      nothing more.
-- [ ] Accessibility: dyslexia-friendly font option, adjustable text size and
-      line spacing, reduced-motion mode.
+      per correct word, 25 bonus, 100 points = 1 JKD, cheapest sticker 0.50 JKD)
+      are a considered guess and nothing more.
+- [ ] A dyslexia-friendly font option. Needs a licensed font file to bundle —
+      the text size and line spacing controls cover part of the need, but not
+      the typeface itself.
+- [ ] Daily goal, e.g. "read one passage today", with a gentle nudge rather than
+      a hard streak break.
+- [ ] Weekly chart of accuracy and words per minute, once there is enough
+      history to make a chart meaningful.
 
 ---
 

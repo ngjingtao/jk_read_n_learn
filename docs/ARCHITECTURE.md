@@ -108,6 +108,35 @@ microphone ──► SpeechService ──► transcript ──► tokenize()
 
 ## Key decisions
 
+### Currency and encouragement are kept apart
+
+`WalletState` holds the JKD balance and ledger. `ProgressState` holds streaks,
+per-passage records, and the reward collection. They are separate providers and
+separate storage keys on purpose.
+
+The wallet has to be exact: a child who earned 137 rewards should still see the
+balance they earned, which is why `Jkd` is an integer number of hundredths. The
+progress data is encouragement and can be lossy — if a streak record is corrupt
+it is discarded and rebuilt, and the child keeps every coin.
+
+If they shared a store, a corrupt streak counter would sit next to real money.
+Splitting them means the blast radius of a bug is limited to the part that does
+not matter financially.
+
+Purchases go into the *wallet* ledger as negative amounts, because that is money.
+The reward's display name is not stored — only its id — so the ledger renders in
+whichever language is active now rather than the one it was bought in.
+
+### Spending fails closed, granting fails open
+
+`WalletState.spend` checks the balance and only then debits, with no `await`
+between the two, so a double-tap on a Buy button cannot overdraw.
+
+The shop grants the reward *before* taking payment. That ordering is deliberate:
+if the write fails halfway, the child ends up with a sticker they did not pay
+for, which nobody will complain about. The reverse — money taken, nothing
+received — is the failure a child would actually notice and be upset by.
+
 ### The scoring engine has no Flutter dependency
 
 `lib/services/scoring/` is plain Dart. That means:

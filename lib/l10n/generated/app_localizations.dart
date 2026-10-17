@@ -520,6 +520,234 @@ abstract class AppLocalizations {
   /// **'About'**
   String get settingsAbout;
 
+  /// No description provided for @settingsComfort.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading comfort'**
+  String get settingsComfort;
+
+  /// No description provided for @settingsTextSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get settingsTextSize;
+
+  /// No description provided for @settingsTextSizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get settingsTextSizeSmall;
+
+  /// No description provided for @settingsTextSizeNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get settingsTextSizeNormal;
+
+  /// No description provided for @settingsTextSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get settingsTextSizeLarge;
+
+  /// No description provided for @settingsTextSizeExtraLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra large'**
+  String get settingsTextSizeExtraLarge;
+
+  /// No description provided for @settingsLineSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Line spacing'**
+  String get settingsLineSpacing;
+
+  /// No description provided for @settingsLineSpacingNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get settingsLineSpacingNormal;
+
+  /// No description provided for @settingsLineSpacingWide.
+  ///
+  /// In en, this message translates to:
+  /// **'Wide'**
+  String get settingsLineSpacingWide;
+
+  /// No description provided for @settingsLineSpacingExtraWide.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra wide'**
+  String get settingsLineSpacingExtraWide;
+
+  /// No description provided for @settingsReduceMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce motion'**
+  String get settingsReduceMotion;
+
+  /// No description provided for @settingsReduceMotionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops the pulsing listening indicator. The timer beside it still shows what is happening.'**
+  String get settingsReduceMotionSubtitle;
+
+  /// No description provided for @streakDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day streak} other{{days} day streak}}'**
+  String streakDays(int days);
+
+  /// No description provided for @streakNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Read today to start a streak'**
+  String get streakNone;
+
+  /// No description provided for @streakBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {days} days'**
+  String streakBest(int days);
+
+  /// No description provided for @streakTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Days in a row you have read'**
+  String get streakTooltip;
+
+  /// No description provided for @shopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward shop'**
+  String get shopTitle;
+
+  /// No description provided for @shopSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend your JKD on stickers for your collection.'**
+  String get shopSubtitle;
+
+  /// No description provided for @shopOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get shopOwned;
+
+  /// No description provided for @shopBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy'**
+  String get shopBuy;
+
+  /// No description provided for @shopNotEnough.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough JKD yet'**
+  String get shopNotEnough;
+
+  /// No description provided for @shopCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'My collection'**
+  String get shopCollection;
+
+  /// No description provided for @shopCollectionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing collected yet. Read a passage, then come back.'**
+  String get shopCollectionEmpty;
+
+  /// No description provided for @shopBought.
+  ///
+  /// In en, this message translates to:
+  /// **'You bought {name}'**
+  String shopBought(String name);
+
+  /// No description provided for @rewardStar.
+  ///
+  /// In en, this message translates to:
+  /// **'Star'**
+  String get rewardStar;
+
+  /// No description provided for @rewardHeart.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart'**
+  String get rewardHeart;
+
+  /// No description provided for @rewardRocket.
+  ///
+  /// In en, this message translates to:
+  /// **'Rocket'**
+  String get rewardRocket;
+
+  /// No description provided for @rewardRainbow.
+  ///
+  /// In en, this message translates to:
+  /// **'Rainbow'**
+  String get rewardRainbow;
+
+  /// No description provided for @rewardPanda.
+  ///
+  /// In en, this message translates to:
+  /// **'Panda'**
+  String get rewardPanda;
+
+  /// No description provided for @rewardDragon.
+  ///
+  /// In en, this message translates to:
+  /// **'Dragon'**
+  String get rewardDragon;
+
+  /// No description provided for @rewardCrown.
+  ///
+  /// In en, this message translates to:
+  /// **'Crown'**
+  String get rewardCrown;
+
+  /// No description provided for @rewardTrophy.
+  ///
+  /// In en, this message translates to:
+  /// **'Trophy'**
+  String get rewardTrophy;
+
+  /// No description provided for @progressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your progress'**
+  String get progressTitle;
+
+  /// No description provided for @progressAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Read once} other{Read {count} times}}'**
+  String progressAttempts(int count);
+
+  /// No description provided for @progressBestAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {percent}%'**
+  String progressBestAccuracy(int percent);
+
+  /// No description provided for @progressBestSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Best speed: {wpm} words per minute'**
+  String progressBestSpeed(int wpm);
+
+  /// No description provided for @progressNewRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'A new best for this passage!'**
+  String get progressNewRecord;
+
+  /// No description provided for @progressNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read yet'**
+  String get progressNever;
+
   /// No description provided for @languageEnglish.
   ///
   /// In en, this message translates to:

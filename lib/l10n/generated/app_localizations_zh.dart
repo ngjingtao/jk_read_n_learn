@@ -246,6 +246,132 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAbout => '关于';
 
   @override
+  String get settingsComfort => '阅读舒适度';
+
+  @override
+  String get settingsTextSize => '字体大小';
+
+  @override
+  String get settingsTextSizeSmall => '小';
+
+  @override
+  String get settingsTextSizeNormal => '标准';
+
+  @override
+  String get settingsTextSizeLarge => '大';
+
+  @override
+  String get settingsTextSizeExtraLarge => '特大';
+
+  @override
+  String get settingsLineSpacing => '行距';
+
+  @override
+  String get settingsLineSpacingNormal => '标准';
+
+  @override
+  String get settingsLineSpacingWide => '宽';
+
+  @override
+  String get settingsLineSpacingExtraWide => '超宽';
+
+  @override
+  String get settingsReduceMotion => '减少动态效果';
+
+  @override
+  String get settingsReduceMotionSubtitle => '停止聆听时的闪烁圆点。旁边的计时器仍会显示当前状态。';
+
+  @override
+  String streakDays(int days) {
+    return '已连续 $days 天';
+  }
+
+  @override
+  String get streakNone => '今天读一次，开始连续记录';
+
+  @override
+  String streakBest(int days) {
+    return '最长：$days 天';
+  }
+
+  @override
+  String get streakTooltip => '连续阅读的天数';
+
+  @override
+  String get shopTitle => '奖励商店';
+
+  @override
+  String get shopSubtitle => '用你赚到的 JKD 换贴纸，收集起来。';
+
+  @override
+  String get shopOwned => '已拥有';
+
+  @override
+  String get shopBuy => '购买';
+
+  @override
+  String get shopNotEnough => 'JKD 还不够';
+
+  @override
+  String get shopCollection => '我的收藏';
+
+  @override
+  String get shopCollectionEmpty => '还没有收藏。先读一篇文章，再回来看看。';
+
+  @override
+  String shopBought(String name) {
+    return '你买到了$name';
+  }
+
+  @override
+  String get rewardStar => '星星';
+
+  @override
+  String get rewardHeart => '爱心';
+
+  @override
+  String get rewardRocket => '火箭';
+
+  @override
+  String get rewardRainbow => '彩虹';
+
+  @override
+  String get rewardPanda => '熊猫';
+
+  @override
+  String get rewardDragon => '龙';
+
+  @override
+  String get rewardCrown => '王冠';
+
+  @override
+  String get rewardTrophy => '奖杯';
+
+  @override
+  String get progressTitle => '你的进度';
+
+  @override
+  String progressAttempts(int count) {
+    return '已读 $count 次';
+  }
+
+  @override
+  String progressBestAccuracy(int percent) {
+    return '最好：$percent%';
+  }
+
+  @override
+  String progressBestSpeed(int wpm) {
+    return '最快：每分钟 $wpm 个字';
+  }
+
+  @override
+  String get progressNewRecord => '这篇读出了新纪录！';
+
+  @override
+  String get progressNever => '还没读过';
+
+  @override
   String get languageEnglish => 'English';
 
   @override

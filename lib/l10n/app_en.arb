@@ -142,6 +142,78 @@
   "settingsHearingTest": "Hearing test",
   "settingsHearingTestSubtitle": "Check that the microphone and the recogniser can hear you",
   "settingsAbout": "About",
+  "settingsComfort": "Reading comfort",
+  "settingsTextSize": "Text size",
+  "settingsTextSizeSmall": "Small",
+  "settingsTextSizeNormal": "Normal",
+  "settingsTextSizeLarge": "Large",
+  "settingsTextSizeExtraLarge": "Extra large",
+  "settingsLineSpacing": "Line spacing",
+  "settingsLineSpacingNormal": "Normal",
+  "settingsLineSpacingWide": "Wide",
+  "settingsLineSpacingExtraWide": "Extra wide",
+  "settingsReduceMotion": "Reduce motion",
+  "settingsReduceMotionSubtitle": "Stops the pulsing listening indicator. The timer beside it still shows what is happening.",
+
+  "streakDays": "{days, plural, =1{1 day streak} other{{days} day streak}}",
+  "@streakDays": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "streakNone": "Read today to start a streak",
+  "streakBest": "Best: {days} days",
+  "@streakBest": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "streakTooltip": "Days in a row you have read",
+
+  "shopTitle": "Reward shop",
+  "shopSubtitle": "Spend your JKD on stickers for your collection.",
+  "shopOwned": "Owned",
+  "shopBuy": "Buy",
+  "shopNotEnough": "Not enough JKD yet",
+  "shopCollection": "My collection",
+  "shopCollectionEmpty": "Nothing collected yet. Read a passage, then come back.",
+  "shopBought": "You bought {name}",
+  "@shopBought": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "rewardStar": "Star",
+  "rewardHeart": "Heart",
+  "rewardRocket": "Rocket",
+  "rewardRainbow": "Rainbow",
+  "rewardPanda": "Panda",
+  "rewardDragon": "Dragon",
+  "rewardCrown": "Crown",
+  "rewardTrophy": "Trophy",
+
+  "progressTitle": "Your progress",
+  "progressAttempts": "{count, plural, =1{Read once} other{Read {count} times}}",
+  "@progressAttempts": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "progressBestAccuracy": "Best: {percent}%",
+  "@progressBestAccuracy": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "progressBestSpeed": "Best speed: {wpm} words per minute",
+  "@progressBestSpeed": {
+    "placeholders": {
+      "wpm": { "type": "int" }
+    }
+  },
+  "progressNewRecord": "A new best for this passage!",
+  "progressNever": "Not read yet",
 
   "languageEnglish": "English",
   "languageChinese": "中文",

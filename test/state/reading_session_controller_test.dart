@@ -6,6 +6,7 @@ import 'package:jkreadnlearn/services/permission_service.dart';
 import 'package:jkreadnlearn/services/speech_service.dart';
 import 'package:jkreadnlearn/services/tts_service.dart';
 import 'package:jkreadnlearn/services/voice_separator.dart';
+import 'package:jkreadnlearn/state/progress_state.dart';
 import 'package:jkreadnlearn/state/reading_session_controller.dart';
 import 'package:jkreadnlearn/state/settings_state.dart';
 import 'package:jkreadnlearn/state/wallet_state.dart';
@@ -138,6 +139,7 @@ void main() {
     FakePermissionService? permissions,
     FakeTtsService? tts,
     WalletState? wallet,
+    ProgressState? progress,
   }) {
     return ReadingSessionController(
       essay: _essay,
@@ -146,6 +148,7 @@ void main() {
       permissions:
           permissions ?? FakePermissionService(MicrophoneAccess.granted),
       wallet: wallet ?? WalletState(),
+      progress: progress ?? ProgressState(),
       settings: SettingsState(),
       voiceSeparation: VoiceSeparationRegistry(),
     );

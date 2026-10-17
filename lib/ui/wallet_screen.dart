@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../l10n/generated/app_localizations.dart';
+import '../state/progress_state.dart';
 import '../state/wallet_state.dart';
 import 'l10n_extensions.dart';
 
@@ -96,16 +97,24 @@ class WalletScreen extends StatelessWidget {
                   ),
                 ),
                 title: Text(
-                  entry.label,
+                  // Purchases store an id, not a translated string, so the
+                  // ledger renders in whatever language is active *now*.
+                  entry.rewardId != null
+                      ? l10n.rewardNameById(entry.rewardId!)
+                      : entry.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 subtitle: Text(formatShortDate(entry.at, localeName)),
                 trailing: Text(
-                  '+${entry.amount.label}',
+                  // Signed: purchases show as a negative amount, so the ledger
+                  // reads correctly without a second code path.
+                  '${entry.amount.hundredths >= 0 ? '+' : ''}${entry.amount.label}',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.primary,
+                    color: entry.amount.hundredths >= 0
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.error,
                   ),
                 ),
               ),
@@ -116,6 +125,7 @@ class WalletScreen extends StatelessWidget {
 
   Future<void> _confirmReset(BuildContext context, WalletState wallet) async {
     final l10n = AppLocalizations.of(context);
+    final progress = context.read<ProgressState>();
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -136,7 +146,10 @@ class WalletScreen extends StatelessWidget {
     );
 
     if (confirmed == true) {
+      // Reset both together. Clearing the balance but leaving the collection
+      // would let a child keep rewards they never paid for.
       await wallet.reset();
+      await progress.reset();
     }
   }
 }

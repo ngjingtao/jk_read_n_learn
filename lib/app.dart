@@ -6,6 +6,7 @@ import 'services/permission_service.dart';
 import 'services/speech_service.dart';
 import 'services/tts_service.dart';
 import 'services/voice_separator.dart';
+import 'state/progress_state.dart';
 import 'state/settings_state.dart';
 import 'state/wallet_state.dart';
 import 'ui/home_screen.dart';
@@ -37,6 +38,9 @@ class JkReadNLearnApp extends StatelessWidget {
         ChangeNotifierProvider<SettingsState>(
           create: (_) => SettingsState()..load(),
         ),
+        ChangeNotifierProvider<ProgressState>(
+          create: (_) => ProgressState()..load(),
+        ),
       ],
       // The interface language lives in SettingsState, so the whole MaterialApp
       // has to rebuild when it changes. The app renders in the default language
@@ -50,6 +54,15 @@ class JkReadNLearnApp extends StatelessWidget {
             locale: settings.locale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
+            // Applied across the whole app via MediaQuery rather than by
+            // editing every TextStyle, so third-party widgets and dialogs scale
+            // with it too.
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(settings.textSize.factor),
+              ),
+              child: child ?? const SizedBox.shrink(),
+            ),
             home: const HomeScreen(),
           );
         },
