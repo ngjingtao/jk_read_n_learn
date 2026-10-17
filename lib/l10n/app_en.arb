@@ -1,0 +1,175 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "JK Read n Learn",
+  "@appTitle": {
+    "description": "The product name. Kept identical in every language."
+  },
+
+  "homeGreeting": "What shall we read today?",
+  "homeSubtitle": "Tap any word to hear it. Then read it out loud to earn JKD.",
+  "unitWords": "{count} {count, plural, =1{word} other{words}}",
+  "@unitWords": {
+    "description": "Count plus unit, e.g. '42 words'. Self-contained so callers can concatenate it directly.",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "unitCharacters": "{count} {count, plural, =1{character} other{characters}}",
+  "@unitCharacters": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "standardLabel": "Standard {grade}",
+  "@standardLabel": {
+    "placeholders": {
+      "grade": { "type": "int" }
+    }
+  },
+
+  "actionListen": "Listen",
+  "actionReadAloud": "Read aloud",
+  "actionCancel": "Cancel",
+  "actionAllDone": "All done",
+  "actionReadAgain": "Read it again",
+  "actionBackToList": "Back to my reading list",
+  "actionOpenSettings": "Open settings",
+  "actionKeepIt": "Keep it",
+  "actionClear": "Clear",
+  "actionStartListening": "Start listening",
+  "actionStop": "Stop",
+
+  "listeningStatus": "Listening… {time}",
+  "@listeningStatus": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "iCanHear": "I can hear:",
+  "markingInProgress": "Marking your reading…",
+
+  "howListeningWorks": "How listening works",
+  "micSheetTitle": "What the microphone hears",
+  "micSheetBody": "Right now the app marks whatever the microphone picks up, so a parent reading along or a television in the room can end up in the transcript. Voice filtering is planned.",
+  "strategyLabel": "Strategy: {name}",
+  "@strategyLabel": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "speechRecognitionStatus": "Speech recognition: {status}",
+  "@speechRecognitionStatus": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "statusAvailable": "available",
+  "statusUnavailable": "not available on this device",
+
+  "voiceStrategyPassthroughName": "Raw microphone",
+  "voiceStrategyPassthroughDescription": "No filtering. Every voice in the room can be picked up by the recogniser.",
+
+  "errorNothingHeard": "I could not hear anything. Try reading a little louder.",
+  "errorRecogniserUnavailable": "Speech recognition is not available on this device.",
+  "errorLocaleUnavailable": "This device has no speech recogniser for {language}. Install the language pack in system settings.",
+  "@errorLocaleUnavailable": {
+    "placeholders": {
+      "language": { "type": "String" }
+    }
+  },
+  "errorEngineFailed": "The voice engine could not start on this device.",
+  "errorPermissionDenied": "JK Read n Learn needs the microphone to mark your reading. Allow it when asked, then try again.",
+  "errorPermissionPermanentlyDenied": "Microphone access is switched off. Open your device settings, allow the microphone for JK Read n Learn, then come back.",
+
+  "resultTitle": "Your marks",
+  "resultAccurate": "accurate",
+  "resultSummary": "{correct} of {total} words read correctly in {seconds}s",
+  "@resultSummary": {
+    "placeholders": {
+      "correct": { "type": "int" },
+      "total": { "type": "int" },
+      "seconds": { "type": "int" }
+    }
+  },
+  "resultWordsPerMinute": "{wpm} words per minute",
+  "@resultWordsPerMinute": {
+    "placeholders": {
+      "wpm": { "type": "int" }
+    }
+  },
+  "resultEarned": "You earned {amount}",
+  "@resultEarned": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "resultPoints": "{points} points",
+  "@resultPoints": {
+    "placeholders": {
+      "points": { "type": "int" }
+    }
+  },
+  "labelCorrect": "Read correctly",
+  "labelNearlyRight": "Nearly right",
+  "labelMissed": "Missed or wrong",
+  "labelExtra": "Extra words added",
+  "resultHowYouReadIt": "How you read it",
+  "resultColourLegend": "Green is right, amber is close, red was skipped or said wrongly. Tap a word to hear it again.",
+  "extrasTitle": "Words I heard that are not in the passage",
+  "extrasNote": "If someone else was reading nearby, their voice may be picked up too. Voice filtering is coming.",
+
+  "gradeOutstanding": "Outstanding",
+  "gradeGreat": "Great reading",
+  "gradeGood": "Good effort",
+  "gradeKeepPractising": "Keep practising",
+  "gradeTryAgain": "Try again",
+
+  "walletTitle": "My JKD",
+  "walletCurrencyName": "Jiong Ke Dollars",
+  "walletTagline": "Earned by reading out loud.",
+  "walletHistory": "History",
+  "walletEmpty": "No rewards yet. Read a passage to earn your first JKD!",
+  "walletResetTitle": "Start over?",
+  "walletResetBody": "This clears the JKD balance and all reading history on this device.",
+  "walletResetTooltip": "Start over",
+
+  "settingsTitle": "Settings",
+  "settingsAppLanguage": "App language",
+  "settingsSoundAndSpeech": "Sound and speech",
+  "settingsOnDeviceOnly": "Use on-device recognition only",
+  "settingsOnDeviceOnlySubtitle": "Better privacy: the voice never leaves the tablet. But on many devices the offline model for a language is missing, and listening will fail rather than fall back.",
+  "settingsHearingTest": "Hearing test",
+  "settingsHearingTestSubtitle": "Check that the microphone and the recogniser can hear you",
+  "settingsAbout": "About",
+
+  "languageEnglish": "English",
+  "languageChinese": "中文",
+  "languageMalay": "Bahasa Melayu",
+
+  "diagnosticsTitle": "Hearing test",
+  "diagnosticsIntro": "Read the sentences below out loud, then check that the words appear below.",
+  "diagnosticsHeard": "I heard:",
+  "diagnosticsNothingYet": "Nothing yet. Tap Start listening and read out loud.",
+  "diagnosticsMicPermission": "Microphone permission",
+  "diagnosticsRecogniser": "Speech recognition",
+  "diagnosticsRecogniserLanguage": "Recogniser language",
+  "diagnosticsOnDeviceMode": "Recognition mode",
+  "diagnosticsOnDeviceModeValue": "On device only",
+  "diagnosticsNetworkModeValue": "On device and network",
+  "diagnosticsGranted": "Granted",
+  "diagnosticsDenied": "Denied",
+  "diagnosticsAvailable": "Available",
+  "diagnosticsUnavailable": "Not available",
+  "diagnosticsUnknown": "Unknown",
+  "diagnosticsNoneInstalled": "No matching language pack installed",
+  "diagnosticsPrivacyNote": "Nothing you say here is saved or scored.",
+
+  "aboutBody": "JK Read n Learn teaches children to read aloud in English, Chinese and Bahasa Malaysia. Tap any word to hear it, read the passage out loud, and earn JKD.",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# Configuration for `flutter gen-l10n`, which turns the .arb files in lib/l10n
+# into the AppLocalizations class the UI reads strings from.
+#
+# English is the template: every key must exist there first. Chinese and Malay
+# are translations of it, and `flutter gen-l10n` reports any key they are
+# missing.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+output-dir: lib/l10n/generated
+nullable-getter: false

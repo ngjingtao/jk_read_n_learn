@@ -1,0 +1,136 @@
+name: CI
+
+# Nothing in this project has ever run on real hardware, because the machine it
+# was written on has no Android SDK and no Xcode. This workflow is how that gap
+# gets closed: every push builds the real thing on real toolchains.
+#
+# What each job buys you:
+#   analyse-test  fast feedback, runs first, gates everything else
+#   android       proves the manifest, Gradle config and all plugins link
+#   ios           proves the Info.plist and CocoaPods link (needs macOS)
+#   web           fastest full Dart compile; also a demo you can open in a browser
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.7'
+
+jobs:
+  analyse-test:
+    name: Analyse and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # Fails the build if lib/l10n/generated is out of date with the .arb files,
+      # which is easy to forget after editing a translation.
+      - name: Regenerate localisations
+        run: flutter gen-l10n
+
+      - name: Fail if generated localisations are stale
+        run: git diff --exit-code -- lib/l10n/generated
+
+      - run: flutter analyze
+
+      - run: flutter test --reporter expanded
+
+  android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: analyse-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # The release build is signed with the debug key (see android/app/build.gradle.kts),
+      # so it needs no secrets. Fine for internal testing, not for the Play Store.
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: jk-read-n-learn-android
+          path: build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+
+  ios:
+    name: Build iOS (unsigned)
+    runs-on: macos-latest
+    needs: analyse-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # --no-codesign needs no Apple developer account. This proves the project
+      # compiles and the microphone / speech-recognition usage strings are
+      # present; it does not produce something installable on a device.
+      - name: Build iOS without code signing
+        run: flutter build ios --release --no-codesign
+
+      - name: Upload iOS app bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: jk-read-n-learn-ios-unsigned
+          path: build/ios/iphoneos/Runner.app
+          if-no-files-found: error
+
+  web:
+    name: Build web
+    runs-on: ubuntu-latest
+    needs: analyse-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Build web
+        run: flutter build web --release
+
+      - name: Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: jk-read-n-learn-web
+          path: build/web
+          if-no-files-found: error

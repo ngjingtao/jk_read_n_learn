@@ -1,0 +1,35 @@
+{
+    "name": "JK Read n Learn",
+    "short_name": "JK Read",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#F6FAF8",
+    "theme_color": "#2E7D6F",
+    "description": "Learn to read aloud in English, Chinese and Bahasa Malaysia. Tap any word to hear it, read the passage out loud, and earn JKD.",
+    "orientation": "any",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

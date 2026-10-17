@@ -1,0 +1,20 @@
+# Normalise line endings to LF everywhere.
+#
+# This is not cosmetic. The CI workflow regenerates the localisation files and
+# then runs `git diff --exit-code` to prove they are up to date. Without this
+# file, a Windows checkout converts the generated Dart to CRLF, the diff is never
+# empty, and the check fails for a reason that has nothing to do with the code.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.jar binary
+*.keystore binary
+*.jks binary
+*.xcuserstate binary
