@@ -73,7 +73,30 @@ jobs:
       # The release build is signed with the debug key (see android/app/build.gradle.kts),
       # so it needs no secrets. Fine for internal testing, not for the Play Store.
       - name: Build release APK
-        run: flutter build apk --release
+        shell: bash
+        # pipefail so `tee` cannot swallow Gradle's non-zero exit code.
+        run: |
+          set -o pipefail
+          flutter build apk --release 2>&1 | tee android-build.log
+
+      # Gradle buries the actual cause of a failure hundreds of lines deep, and
+      # raw job logs need authentication to read. Publishing the real errors as
+      # workflow annotations makes the failure readable straight from the UI —
+      # and from the public API, which means a broken build can be diagnosed
+      # without asking a human to copy-paste the log.
+      - name: Surface build errors
+        if: failure()
+        shell: bash
+        run: |
+          echo "--- errors found in the build log ---"
+          grep -nE "error:|FAILURE:|Execution failed|What went wrong|Caused by:|requires libraries" android-build.log \
+            | tail -n 20 \
+            | while IFS= read -r line; do
+                escaped="${line//%/%25}"
+                echo "::error::${escaped}"
+              done
+          echo "--- last 40 lines of the build ---"
+          tail -n 40 android-build.log
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

@@ -6,7 +6,19 @@ plugins {
 
 android {
     namespace = "com.jkreadnlearn.jkreadnlearn"
-    compileSdk = flutter.compileSdkVersion
+    // Both of these are set by dependencies, not by preference. Taking the
+    // higher of the two keeps them correct if either side moves.
+    //
+    // compileSdk: permission_handler_android declares compileSdk 37, and AGP
+    // fails the build if the app compiles against anything lower:
+    //   Dependency ':permission_handler_android' requires libraries and
+    //   applications that depend on it to compile against version 37 or later
+    //   of the Android APIs. :app is currently compiled against android-36.
+    // Flutter 3.47's own default is 36, so this has to be raised explicitly.
+    //
+    // minSdk: flutter_tts declares minSdkVersion 24. Flutter's default is also
+    // 24, but stating the floor as a max keeps the intent visible.
+    compileSdk = maxOf(37, flutter.compileSdkVersion)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -19,16 +31,6 @@ android {
         applicationId = "com.jkreadnlearn.jkreadnlearn"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // The floor here is set by dependencies, not by preference.
-        //
-        // flutter_tts declares minSdkVersion 24. Hardcoding anything lower fails
-        // the manifest merge with:
-        //   uses-sdk:minSdkVersion 23 cannot be smaller than version 24
-        //   declared in library [flutter_tts]
-        // which is exactly what happened the first time this project was pushed.
-        //
-        // Taking the higher of 24 and Flutter's own floor keeps this correct if
-        // either side moves, instead of silently drifting below the ecosystem.
         minSdk = maxOf(24, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
