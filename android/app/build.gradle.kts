@@ -19,10 +19,17 @@ android {
         applicationId = "com.jkreadnlearn.jkreadnlearn"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // Pinned rather than inherited: speech_to_text and flutter_tts both
-        // require API 21+ for their audio pipelines, and pinning makes the
-        // floor explicit so a Flutter upgrade cannot silently move it.
-        minSdk = 23
+        // The floor here is set by dependencies, not by preference.
+        //
+        // flutter_tts declares minSdkVersion 24. Hardcoding anything lower fails
+        // the manifest merge with:
+        //   uses-sdk:minSdkVersion 23 cannot be smaller than version 24
+        //   declared in library [flutter_tts]
+        // which is exactly what happened the first time this project was pushed.
+        //
+        // Taking the higher of 24 and Flutter's own floor keeps this correct if
+        // either side moves, instead of silently drifting below the ecosystem.
+        minSdk = maxOf(24, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
