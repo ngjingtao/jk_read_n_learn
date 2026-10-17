@@ -22,6 +22,7 @@
   "actionStop": "Berhenti",
 
   "listeningStatus": "Sedang mendengar… {time}",
+  "listeningHowToStop": "Ketik Saya sudah habis apabila selesai, atau butang henti merah di atas.",
   "iCanHear": "Saya dengar:",
   "markingInProgress": "Sedang menanda bacaan anda…",
 

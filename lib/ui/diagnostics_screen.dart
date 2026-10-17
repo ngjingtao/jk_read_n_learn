@@ -12,7 +12,7 @@ import 'l10n_extensions.dart';
 /// The hearing test: read a sentence, see what the device actually heard.
 ///
 /// This screen exists because the single most common support problem is "it
-/// does not work", which can mean four very different things â€” no microphone
+/// does not work", which can mean four very different things — no microphone
 /// permission, no speech recogniser, no language pack, or a genuinely quiet
 /// child. Showing all four states at once turns an unanswerable bug report into
 /// a five-second diagnosis.

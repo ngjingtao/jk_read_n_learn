@@ -85,6 +85,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get listeningHowToStop =>
+      'Tap All done when you finish, or the red stop button at the top.';
+
+  @override
   String get iCanHear => 'I can hear:';
 
   @override

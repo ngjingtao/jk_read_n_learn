@@ -73,6 +73,10 @@ class AppLocalizationsMs extends AppLocalizations {
   }
 
   @override
+  String get listeningHowToStop =>
+      'Ketik Saya sudah habis apabila selesai, atau butang henti merah di atas.';
+
+  @override
   String get iCanHear => 'Saya dengar:';
 
   @override

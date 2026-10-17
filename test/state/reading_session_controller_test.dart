@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jkreadnlearn/models/app_language.dart';
 import 'package:jkreadnlearn/models/essay.dart';
@@ -38,6 +40,15 @@ class FakeSpeechService implements SpeechRecogniser {
   /// Optional per-update confidences, used to exercise the confidence tracker.
   List<double?>? confidenceSequence;
 
+  /// When true, `listen` never completes on its own, modelling a platform that
+  /// is waiting on a permission prompt. [releaseListen] lets the test finish it.
+  bool hangOnListen = false;
+  final Completer<SpeechFailure?> _hang = Completer<SpeechFailure?>();
+
+  void releaseListen() {
+    if (!_hang.isCompleted) _hang.complete(null);
+  }
+
   void Function(SpeechSessionEnd reason)? _onSessionEnd;
   int listenCalls = 0;
   bool cancelled = false;
@@ -67,6 +78,8 @@ class FakeSpeechService implements SpeechRecogniser {
     listenCalls++;
     if (failure != null) return failure;
     _onSessionEnd = onSessionEnd;
+
+    if (hangOnListen) return _hang.future;
 
     final sequence = confidenceSequence;
     if (sequence != null) {
@@ -375,6 +388,71 @@ void main() {
       await controller.startListening();
 
       expect(speech.listenCalls, 1);
+    });
+  });
+
+  group('escaping a stuck microphone', () {
+    test('cancel works while the microphone is still opening', () async {
+      // Opening the microphone can wait on a browser or OS prompt. A cancel
+      // during that window must be possible, or the screen is a dead end.
+      final speech = FakeSpeechService()..hangOnListen = true;
+      final controller = build(speech: speech);
+
+      final starting = controller.startListening();
+      await pumpEventQueue();
+      expect(controller.phase, ReadingPhase.checkingPermission);
+      expect(controller.isMicrophoneBusy, isTrue);
+
+      await controller.cancelListening();
+
+      expect(controller.phase, ReadingPhase.ready);
+      expect(controller.isMicrophoneBusy, isFalse);
+
+      speech.releaseListen();
+      await starting;
+    });
+
+    test('a late success cannot resurrect a cancelled session', () async {
+      // The bug this pins: listen() resolves after the user already cancelled,
+      // and sets the phase back to "listening" — a session nobody can stop.
+      final speech = FakeSpeechService(transcript: 'The cat sat')
+        ..hangOnListen = true;
+      final controller = build(speech: speech);
+
+      final starting = controller.startListening();
+      await pumpEventQueue();
+
+      await controller.cancelListening();
+      speech.releaseListen();
+      await starting;
+      await pumpEventQueue();
+
+      expect(
+        controller.phase,
+        ReadingPhase.ready,
+        reason: 'the cancel must win over the late listen success',
+      );
+      expect(speech.cancelled, isTrue);
+    });
+
+    test('cancel is a no-op when nothing is happening', () async {
+      final controller = build();
+
+      await controller.cancelListening();
+
+      expect(controller.phase, ReadingPhase.ready);
+      expect(controller.isMicrophoneBusy, isFalse);
+    });
+
+    test('the microphone is reported busy while opening and while listening',
+        () async {
+      final controller = build();
+
+      expect(controller.isMicrophoneBusy, isFalse);
+      await controller.startListening();
+      expect(controller.isMicrophoneBusy, isTrue);
+      await controller.cancelListening();
+      expect(controller.isMicrophoneBusy, isFalse);
     });
   });
 }

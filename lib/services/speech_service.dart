@@ -254,9 +254,12 @@ class SpeechService implements SpeechRecogniser {
     if (!_listening && !_sessionActive) return _transcript;
     _stopRequested = true;
     try {
-      await _stt.stop();
+      // A platform that will not answer must not be able to freeze the app.
+      // The transcript already collected is perfectly usable, so a stop that
+      // times out costs nothing and a stop that hangs costs everything.
+      await _stt.stop().timeout(const Duration(seconds: 3));
     } catch (_) {
-      // Nothing useful to do: the transcript we already hold is still valid.
+      // Ignore: the transcript we already hold is still valid.
     }
     _listening = false;
     _sessionActive = false;
@@ -268,7 +271,7 @@ class SpeechService implements SpeechRecogniser {
   Future<void> cancel() async {
     _stopRequested = true;
     try {
-      await _stt.cancel();
+      await _stt.cancel().timeout(const Duration(seconds: 3));
     } catch (_) {
       // Ignore: the session is being abandoned regardless.
     }

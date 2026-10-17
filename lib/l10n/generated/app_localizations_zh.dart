@@ -72,6 +72,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get listeningHowToStop => '读完后点「我读完了」，或点上方的红色停止按钮。';
+
+  @override
   String get iCanHear => '我听到：';
 
   @override

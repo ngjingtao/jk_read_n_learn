@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../models/app_language.dart';
@@ -165,18 +167,32 @@ class ReadingSessionController extends ChangeNotifier {
     // it in settings takes effect on the very next attempt.
     speech.preferOnDevice = settings.preferOnDevice;
 
-    final failure = await speech.listen(
-      language: essay.language,
-      onTranscript: (transcript, confidence) {
-        _liveTranscript = transcript;
-        _confidence?.add(transcript, confidence);
-        _notify();
-      },
-      // The recogniser closes the session itself once the child stops talking.
-      // Without this the app would sit on "listening" forever, which is exactly
-      // how a child ends up staring at a frozen screen.
-      onSessionEnd: _onRecogniserEnded,
-    );
+    // Opening the microphone can block — on the web it waits on a browser
+    // permission prompt, and a platform that never answers would leave the
+    // screen stuck on a spinner with no way out. The timeout turns that into a
+    // recoverable error, and the UI offers a cancel button meanwhile.
+    final SpeechFailure? failure;
+    try {
+      failure = await speech
+          .listen(
+            language: essay.language,
+            onTranscript: (transcript, confidence) {
+              _liveTranscript = transcript;
+              _confidence?.add(transcript, confidence);
+              _notify();
+            },
+            // The recogniser closes the session itself once the child stops
+            // talking. Without this the app would sit on "listening" forever,
+            // which is exactly how a child ends up staring at a frozen screen.
+            onSessionEnd: _onRecogniserEnded,
+          )
+          .timeout(const Duration(seconds: 30));
+    } on TimeoutException {
+      _phase = ReadingPhase.ready;
+      _error = ReadingError.engineFailed;
+      _notify();
+      return;
+    }
 
     if (failure != null) {
       _phase = ReadingPhase.ready;
@@ -186,6 +202,16 @@ class ReadingSessionController extends ChangeNotifier {
         SpeechFailure.engineError => ReadingError.engineFailed,
       };
       _notify();
+      return;
+    }
+
+    // A cancel that arrived while the microphone was still opening must win.
+    // Opening it can take a while — on the web it waits on a browser prompt —
+    // and without this check the late success would set the phase back to
+    // "listening" and resurrect a session the user had already stopped. That is
+    // exactly the shape of "it keeps recording and I cannot stop it".
+    if (_phase != ReadingPhase.checkingPermission) {
+      await speech.cancel();
       return;
     }
 
@@ -203,6 +229,15 @@ class ReadingSessionController extends ChangeNotifier {
     _stopwatch.stop();
     final transcript = await speech.stop();
     final duration = _stopwatch.elapsed;
+
+    // Belt and braces. `stop()` asks the platform for a final result and, on
+    // the web, can leave the microphone open if the browser ignores it —
+    // Chrome runs with `continuous` set, so nothing closes the session on its
+    // own. `cancel()` aborts outright. The transcript is already captured, so
+    // there is nothing left to lose, and a microphone that stays on after the
+    // child has stopped reading is the single most alarming thing this app
+    // could do.
+    unawaited(speech.cancel());
 
     if (transcript.trim().isEmpty) {
       _phase = ReadingPhase.ready;
@@ -252,14 +287,28 @@ class ReadingSessionController extends ChangeNotifier {
   bool get isNewRecord => _isNewRecord;
 
   /// Abandons the attempt without marking or paying out.
+  ///
+  /// Safe to call from any phase, including while the microphone is still being
+  /// opened. That matters more than it sounds: this is the button a parent
+  /// reaches for when something looks stuck, so it must never be the thing that
+  /// does nothing.
   Future<void> cancelListening() async {
-    if (_phase != ReadingPhase.listening) return;
+    if (_phase != ReadingPhase.listening &&
+        _phase != ReadingPhase.checkingPermission) {
+      return;
+    }
     _stopwatch.stop();
     await speech.cancel();
     _liveTranscript = '';
+    _error = null;
     _phase = ReadingPhase.ready;
     _notify();
   }
+
+  /// Whether the microphone is open, or is being opened.
+  bool get isMicrophoneBusy =>
+      _phase == ReadingPhase.listening ||
+      _phase == ReadingPhase.checkingPermission;
 
   /// Returns to a clean slate so the child can read the same passage again.
   void retry() {

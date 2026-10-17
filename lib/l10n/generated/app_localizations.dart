@@ -208,6 +208,12 @@ abstract class AppLocalizations {
   /// **'Listening… {time}'**
   String listeningStatus(String time);
 
+  /// No description provided for @listeningHowToStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap All done when you finish, or the red stop button at the top.'**
+  String get listeningHowToStop;
+
   /// No description provided for @iCanHear.
   ///
   /// In en, this message translates to:

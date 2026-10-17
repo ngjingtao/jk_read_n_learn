@@ -22,6 +22,7 @@
   "actionStop": "停止",
 
   "listeningStatus": "正在聆听…… {time}",
+  "listeningHowToStop": "读完后点「我读完了」，或点上方的红色停止按钮。",
   "iCanHear": "我听到：",
   "markingInProgress": "正在评分……",
 

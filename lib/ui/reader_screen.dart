@@ -87,49 +87,68 @@ class _ReaderScreenState extends State<ReaderScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.essay.title),
-        actions: [
-          IconButton(
-            tooltip: l10n.howListeningWorks,
-            icon: const Icon(Icons.hearing_outlined),
-            onPressed: _showAudioInfoSheet,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: EssayText(
-                      text: widget.essay.text,
-                      language: widget.essay.language,
-                      lineHeight: context.watch<SettingsState>().lineSpacing.height,
-                      onWordTap: _controller.speakWord,
+    return PopScope(
+      // Leaving this screen while the microphone is open would leave it open.
+      // Back must stop listening first, not walk away from a live mic.
+      canPop: !_controller.isMicrophoneBusy,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _cancelListening();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.essay.title),
+          actions: [
+            // Always reachable, whatever the body is doing. A parent whose
+            // screen looks stuck needs one obvious control that cannot be
+            // pushed off-screen or hidden behind a panel.
+            if (_controller.isMicrophoneBusy)
+              IconButton(
+                tooltip: l10n.actionStop,
+                icon: Icon(Icons.stop_circle, color: theme.colorScheme.error),
+                onPressed: _cancelListening,
+              ),
+            IconButton(
+              tooltip: l10n.howListeningWorks,
+              icon: const Icon(Icons.hearing_outlined),
+              onPressed: _showAudioInfoSheet,
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: EssayText(
+                        text: widget.essay.text,
+                        language: widget.essay.language,
+                        lineHeight:
+                            context.watch<SettingsState>().lineSpacing.height,
+                        onWordTap: _controller.speakWord,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            if (_controller.phase == ReadingPhase.listening) _buildLivePanel(theme),
-            if (_controller.error != null) _buildErrorBanner(theme),
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                border: Border(
-                  top: BorderSide(color: theme.colorScheme.outlineVariant),
+              if (_controller.phase == ReadingPhase.listening)
+                _buildLivePanel(theme),
+              if (_controller.error != null) _buildErrorBanner(theme),
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  border: Border(
+                    top: BorderSide(color: theme.colorScheme.outlineVariant),
+                  ),
                 ),
+                child: _buildControls(theme),
               ),
-              child: _buildControls(theme),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -167,13 +186,25 @@ class _ReaderScreenState extends State<ReaderScreen> {
         );
 
       case ReadingPhase.checkingPermission:
-        return const Row(
+        // A cancel button here matters: opening the microphone can wait on a
+        // browser or OS prompt, and without this the only thing on screen is a
+        // spinner with nothing to press.
+        return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
+            const SizedBox(
               width: 22,
               height: 22,
               child: CircularProgressIndicator(strokeWidth: 2.5),
+            ),
+            const SizedBox(width: 16),
+            OutlinedButton(
+              onPressed: _cancelListening,
+              style: OutlinedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              ),
+              child: Text(l10n.actionStop),
             ),
           ],
         );
@@ -202,16 +233,25 @@ class _ReaderScreenState extends State<ReaderScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.listeningHowToStop,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: OutlinedButton.icon(
                     onPressed: _cancelListening,
+                    icon: const Icon(Icons.stop),
+                    label: Text(l10n.actionCancel),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text(l10n.actionCancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -262,8 +302,12 @@ class _ReaderScreenState extends State<ReaderScreen> {
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(14),
       ),
+      // Capped, so a long transcript can never grow tall enough to push the
+      // stop controls off the bottom of a short screen.
+      constraints: const BoxConstraints(maxHeight: 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             l10n.iCanHear,
@@ -272,11 +316,14 @@ class _ReaderScreenState extends State<ReaderScreen> {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            transcript.isEmpty ? 'â€¦' : transcript,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyLarge,
+          Flexible(
+            child: SingleChildScrollView(
+              reverse: true,
+              child: Text(
+                transcript.isEmpty ? '…' : transcript,
+                style: theme.textTheme.bodyLarge,
+              ),
+            ),
           ),
         ],
       ),

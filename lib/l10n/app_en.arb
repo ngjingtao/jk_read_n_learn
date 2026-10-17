@@ -46,6 +46,7 @@
       "time": { "type": "String" }
     }
   },
+  "listeningHowToStop": "Tap All done when you finish, or the red stop button at the top.",
   "iCanHear": "I can hear:",
   "markingInProgress": "Marking your reading…",
 
