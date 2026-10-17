@@ -115,7 +115,7 @@ class _DiagnosticsScreenState extends State<DiagnosticsScreen> {
 
     final failure = await speech.listen(
       language: _language,
-      onTranscript: (transcript) {
+      onTranscript: (transcript, confidence) {
         if (mounted) setState(() => _transcript = transcript);
       },
       onSessionEnd: (_) {

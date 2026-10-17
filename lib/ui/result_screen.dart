@@ -78,6 +78,10 @@ class ResultScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _ExtrasCard(result: result),
           ],
+          if (result.unclearWords > 0) ...[
+            const SizedBox(height: 16),
+            _UnclearCard(result: result),
+          ],
           const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: () => Navigator.of(context).pop(),
@@ -357,6 +361,14 @@ class _BreakdownCard extends StatelessWidget {
               label: l10n.labelCorrect,
               value: result.correctWords,
             ),
+            if (result.unclearWords > 0) ...[
+              const Divider(height: 20),
+              _Row(
+                color: const Color(0xFF0277BD),
+                label: l10n.labelUnclear,
+                value: result.unclearWords,
+              ),
+            ],
             const Divider(height: 20),
             _Row(
               color: const Color(0xFFE65100),
@@ -410,6 +422,72 @@ class _Row extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Explains words the recogniser heard but was unsure about.
+///
+/// This card exists to point the parent at the *microphone*, not the child. The
+/// most likely cause is that the tablet was too far away — and telling a parent
+/// that is far more useful than quietly docking marks.
+class _UnclearCard extends StatelessWidget {
+  const _UnclearCard({required this.result});
+
+  final ScoreResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final unclear =
+        result.alignment.where((w) => w.status == WordStatus.unclear).toList();
+
+    return Card(
+      color: const Color(0xFFE1F5FE),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.hearing, size: 20, color: Color(0xFF01579B)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.labelUnclear,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF01579B),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final word in unclear)
+                  Chip(
+                    label: Text(word.display),
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: Colors.white,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.unclearHint,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: const Color(0xFF01579B),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

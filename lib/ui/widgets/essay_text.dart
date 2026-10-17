@@ -137,6 +137,16 @@ class _EssayTextState extends State<EssayText> {
           color: const Color(0xFF1B5E20),
           fontWeight: FontWeight.w600,
         );
+      case WordStatus.unclear:
+        // Blue rather than amber or red: the child is not being told they got
+        // it wrong, only that the microphone could not confirm it.
+        return base.copyWith(
+          backgroundColor: const Color(0xFFB3E5FC),
+          color: const Color(0xFF01579B),
+          decoration: TextDecoration.underline,
+          decorationStyle: TextDecorationStyle.dotted,
+          decorationColor: const Color(0xFF0277BD),
+        );
       case WordStatus.mispronounced:
         return base.copyWith(
           backgroundColor: const Color(0xFFFFE0B2),

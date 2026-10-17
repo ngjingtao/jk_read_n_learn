@@ -16,7 +16,7 @@ Melayu.
 ## Current status
 
 A working **vertical slice** with the full loop, plus the first round of
-device-reliability work. `flutter analyze` is clean and **107 tests** pass.
+device-reliability work. `flutter analyze` is clean and **125 tests** pass.
 
 | Feature | Status |
 | --- | --- |
@@ -25,6 +25,7 @@ device-reliability work. `flutter analyze` is clean and **107 tests** pass.
 | Tap to hear the whole passage | ✅ Working |
 | Listen to the child read aloud | ✅ Working |
 | Word-level marking (correct / close / missed / added) | ✅ Working |
+| Confidence-aware marking (flags words the microphone was unsure about) | ✅ Working |
 | Points and JKD reward, saved on device | ✅ Working |
 | Reward history / savings book | ✅ Working |
 | Reward shop — spend JKD on a sticker collection | ✅ Working |
@@ -96,7 +97,7 @@ project whose real targets are iPad and Android.
 
 | Job | Runner | Proves |
 | --- | --- | --- |
-| `analyse-test` | ubuntu | Analyzer is clean, 107 tests pass, localisations are up to date |
+| `analyse-test` | ubuntu | Analyzer is clean, 125 tests pass, localisations are up to date |
 | `android` | ubuntu | Manifest, Gradle config and every plugin link; uploads an APK |
 | `ios` | macos | Info.plist usage strings and CocoaPods link |
 | `web` | ubuntu | Full Dart compile; uploads a browsable build |
@@ -104,6 +105,52 @@ project whose real targets are iPad and Android.
 `analyse-test` gates the rest, so a broken build costs one fast job instead of
 three slow ones. The APK is signed with the debug key — fine for handing a
 tablet to a teacher, not for the Play Store.
+
+## Deploying it to a tablet
+
+The web build is the fastest way onto an iPad or an Android tablet: open a URL
+in the browser, no app store, no signing.
+
+### Option A — GitHub Pages (recommended)
+
+Free, no account to create, HTTPS by default, and no cold start.
+
+1. Repository → **Settings** → **Pages** → **Build and deployment** →
+   **Source: GitHub Actions**.
+2. Push to `main`. The `deploy-pages` job builds and publishes automatically.
+3. The URL is `https://<user>.github.io/<repo>/`.
+
+The build passes `--base-href /<repo>/`, because Pages serves from a subpath.
+Without it the page loads and then shows a blank screen.
+
+### Option B — Render
+
+`Dockerfile` and `render.yaml` are in the repository, so Render can create the
+service from **New +** → **Blueprint** with no form-filling.
+
+If you configure it by hand instead, choose **Docker** as the runtime — Render
+looks for `Dockerfile` at the repository root, and a missing one is the cause of
+`failed to read dockerfile: open Dockerfile: no such file or directory`.
+
+> ⚠️ **Render's free tier sleeps after 15 minutes of inactivity.** Waking takes
+> 30–60 seconds. For a child who wants to read *right now*, that is a bad first
+> impression — which is why Pages is the recommendation.
+
+### Read this before relying on the web version
+
+The web build is a **demo, not the product**. Three things differ from the
+native apps, and all three matter:
+
+| | Native app | Web build |
+| --- | --- | --- |
+| Where audio goes | On-device where the model exists | **To Google's or Apple's servers** — browsers do not do offline speech recognition |
+| Malay (`ms-MY`) | Recogniser may be installed | **Very likely unsupported** by the browser |
+| Reliability | Native speech APIs | Varies by browser and version; iOS Safari is the weakest |
+
+So: the web build is excellent for **checking the interface, the marking logic,
+the wallet and the shop** on a real device. It is not a fair test of the
+microphone behaviour, and it is not the privacy story the app is designed
+around. See `docs/VOICE_ISOLATION.md` and `docs/ROADMAP.md` Phase 2.
 
 ### Device setup that matters
 
@@ -191,6 +238,51 @@ them against real children; see `docs/ROADMAP.md` Phase 6.
 
 ---
 
+## When the recogniser is not sure
+
+The worst failure of text-based marking is that modern recognisers
+**auto-correct**. A child says "fink", the recogniser returns "think", and the
+app awards full marks for a word they mispronounced. The transcript cannot show
+this — but the recogniser's own confidence can.
+
+`speech_to_text` rates its output per *utterance*, not per word. So
+`ConfidenceTracker` does the only thing available: it watches the transcript grow
+and records the confidence reported each time a new word appears. A word's score
+is therefore "how sure was the recogniser when this word showed up" — a proxy,
+and documented as one.
+
+Words that matched but scored below the threshold become **unclear** rather than
+correct. That is a genuine third state, not a euphemism for wrong:
+
+| Colour | Meaning |
+| --- | --- |
+| 🟩 Green | Read correctly |
+| 🟦 **Blue** | **Heard, but the microphone was not sure** |
+| 🟧 Amber | Nearly right |
+| 🟥 Red | Missed or wrong |
+
+**By default, unclear words cost the child nothing.** They still earn full marks
+and still count toward accuracy, because a quiet reader with a distant tablet
+must never be punished for the microphone. The result screen shows them in blue,
+lists the words, and points the parent at the microphone rather than at the
+child.
+
+A setting turns on **strict marking**, which is the opposite trade: unclear words
+then lose some marks, which is what catches a mispronunciation the recogniser
+quietly corrected. That is a deliberate opt-in, not the default.
+
+Two properties matter more than the accuracy of the threshold:
+
+- **It fails safe.** When the platform reports no confidence — common on Android
+  — every entry stays unknown and no word is ever downgraded. A device without
+  confidence ratings behaves exactly as it did before this existed.
+- **The threshold is uncalibrated.** It uses the same `0.8` that `speech_to_text`
+  itself suggests, which is a reasonable starting point and nothing more. It is a
+  single constant precisely so that calibration means changing one value. This
+  needs real-device data — see `docs/ROADMAP.md` Phase 3.
+
+---
+
 ## Interface language vs passage language
 
 These are two independent choices, and confusing them would be a real bug:
@@ -265,7 +357,7 @@ channel.
 
 ## Not yet verified
 
-The Dart code is proven: `flutter analyze` is clean, 107 tests pass, and
+The Dart code is proven: `flutter analyze` is clean, 125 tests pass, and
 `flutter build web --release` completes with exit code 0.
 
 What is **not** verified is anything native:

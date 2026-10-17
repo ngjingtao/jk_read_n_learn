@@ -178,6 +178,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labelCorrect => 'Read correctly';
 
   @override
+  String get labelUnclear => 'Not clearly heard';
+
+  @override
   String get labelNearlyRight => 'Nearly right';
 
   @override
@@ -185,6 +188,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labelExtra => 'Extra words added';
+
+  @override
+  String get unclearHint =>
+      'The microphone was not sure about these words. Sitting closer, or using a headset, usually helps. They still count as correct.';
 
   @override
   String get resultHowYouReadIt => 'How you read it';
@@ -303,6 +310,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsReduceMotionSubtitle =>
       'Stops the pulsing listening indicator. The timer beside it still shows what is happening.';
+
+  @override
+  String get settingsStrictConfidence => 'Strict marking for unclear words';
+
+  @override
+  String get settingsStrictConfidenceSubtitle =>
+      'Off by default. When off, words the microphone was unsure about still earn full marks, so a quiet reader is never punished. When on, those words lose some marks, which catches mispronunciations the recogniser quietly corrected.';
 
   @override
   String streakDays(int days) {

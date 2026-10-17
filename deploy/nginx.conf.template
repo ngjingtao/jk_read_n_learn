@@ -1,0 +1,46 @@
+server {
+    # Render injects PORT. The nginx image substitutes it via envsubst, filtered
+    # to PORT only so nginx's own $uri and $host survive.
+    listen ${PORT};
+    listen [::]:${PORT};
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Flutter web ships a ~13 MB bundle; gzip takes a large bite out of that on
+    # a school wifi connection. wasm is included for when the build moves to it.
+    gzip on;
+    gzip_comp_level 5;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_types
+        application/javascript
+        application/json
+        application/wasm
+        image/svg+xml
+        text/css
+        text/plain;
+
+    # Content-hashed build output. Safe to cache hard, because a new build
+    # produces new filenames.
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|otf|wasm)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # These three are NOT content-hashed, so caching them would leave a child's
+    # tablet running a stale version of the app after a deploy — the worst kind
+    # of bug, because it only shows up on someone else's device.
+    location ~* (index\.html|flutter_service_worker\.js|flutter_bootstrap\.js|version\.json|manifest\.json)$ {
+        add_header Cache-Control "no-store, must-revalidate";
+        try_files $uri =404;
+    }
+
+    # Flutter uses path-based URLs, so a deep link like /reader would 404
+    # without falling back to the app shell.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

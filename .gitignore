@@ -46,3 +46,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Local debugging output from 'flutter run'
+run.log
+run.err.log

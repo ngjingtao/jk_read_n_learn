@@ -1,0 +1,23 @@
+# Render blueprint.
+#
+# With this file in the repository, Render can create the service from the
+# dashboard with "New +" -> "Blueprint", instead of filling in a form and
+# guessing at the environment. It also means the deploy configuration is
+# reviewed like code rather than remembered.
+#
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: jk-read-n-learn
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    # Render's own health check. The SPA fallback answers this with index.html,
+    # which is a 200 and therefore a valid liveness signal.
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000

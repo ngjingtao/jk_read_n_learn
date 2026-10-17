@@ -62,6 +62,17 @@ class SettingsScreen extends StatelessWidget {
                   isThreeLine: true,
                 ),
                 const Divider(height: 1),
+                SwitchListTile(
+                  value: settings.strictConfidenceMarking,
+                  onChanged: settings.setStrictConfidenceMarking,
+                  title: Text(l10n.settingsStrictConfidence),
+                  subtitle: Text(
+                    l10n.settingsStrictConfidenceSubtitle,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  isThreeLine: true,
+                ),
+                const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.hearing_outlined),
                   title: Text(l10n.settingsHearingTest),

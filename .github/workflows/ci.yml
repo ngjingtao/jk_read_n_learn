@@ -157,3 +157,49 @@ jobs:
           name: jk-read-n-learn-web
           path: build/web
           if-no-files-found: error
+
+  # Publishes the same build to GitHub Pages, which is the easiest way to get a
+  # URL that works on an iPad or an Android tablet: free, HTTPS by default (the
+  # microphone requires it), and no cold start.
+  #
+  # Requires Pages to be enabled once, in the repository settings:
+  #   Settings -> Pages -> Build and deployment -> Source: GitHub Actions
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: analyse-test
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # GitHub Pages serves from https://<user>.github.io/<repo>/, so every
+      # asset URL has to be prefixed with the repository name. Without this the
+      # page loads and then shows a blank screen, which is a confusing failure
+      # to debug from a tablet.
+      - name: Build web for a subpath
+        run: >-
+          flutter build web --release --no-wasm-dry-run
+          --base-href /${{ github.event.repository.name }}/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

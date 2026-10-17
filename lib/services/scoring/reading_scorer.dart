@@ -23,10 +23,17 @@ class ReadingScorer {
   /// [transcript] is the recogniser output, [duration] is how long the child
   /// read for. Both feed the mark, so a slow, accurate reader and a fast, sloppy
   /// one end up with different results.
+  ///
+  /// [spokenWordConfidences] is optional and may contain `null`s. When the
+  /// recogniser does not rate its output — or [strictConfidence] is off — no
+  /// word is ever downgraded, so a device without confidence ratings behaves
+  /// exactly as it did before this existed.
   ScoreResult score({
     required Essay essay,
     required String transcript,
     required Duration duration,
+    List<double?>? spokenWordConfidences,
+    bool strictConfidence = false,
   }) {
     final mode = essay.language.tokenMode;
 
@@ -50,12 +57,25 @@ class ReadingScorer {
     for (final op in ops) {
       switch (op.type) {
         case AlignmentOpType.match:
+          // A match is normally a full mark. It becomes "unclear" when the
+          // recogniser heard the word but was not confident about it — which is
+          // exactly the signal that it may have auto-corrected a
+          // mispronunciation into the written word.
+          final confidence = spokenWordConfidences != null &&
+                  op.spokenIndex! < spokenWordConfidences.length
+              ? spokenWordConfidences[op.spokenIndex!]
+              : null;
+          final isUnclear = confidence != null &&
+              confidence >= 0 &&
+              confidence < config.unclearConfidenceFloor;
+
           rows[op.targetIndex!] = AlignedWord(
             index: op.targetIndex!,
             display: targetWordTokens[op.targetIndex!].display,
             heard: spokenWordTokens[op.spokenIndex!].display,
-            status: WordStatus.correct,
+            status: isUnclear ? WordStatus.unclear : WordStatus.correct,
             similarity: 1,
+            confidence: confidence,
           );
         case AlignmentOpType.substitute:
           // Close enough to be an attempt at the word; far enough to lose the
@@ -100,6 +120,7 @@ class ReadingScorer {
     ];
 
     final correct = alignment.where((w) => w.status == WordStatus.correct).length;
+    final unclear = alignment.where((w) => w.status == WordStatus.unclear).length;
     final mispronounced =
         alignment.where((w) => w.status == WordStatus.mispronounced).length;
     final missed = alignment.where((w) => w.status == WordStatus.missed).length;
@@ -107,10 +128,17 @@ class ReadingScorer {
 
     final lenient = total == 0
         ? 0.0
-        : (correct + mispronounced * 0.5) / total;
+        : (correct + (strictConfidence ? 0 : unclear) + mispronounced * 0.5) /
+            total;
 
     var points = correct * config.pointsPerCorrectWord +
         mispronounced * config.pointsPerMispronouncedWord;
+    // Unclear words keep their full marks unless the parent has opted into
+    // strict marking, because a bad microphone must never cost a child marks.
+    points += unclear *
+        (strictConfidence
+            ? config.pointsPerUnclearWord
+            : config.pointsPerCorrectWord);
     if (lenient >= config.completionBonusMinAccuracy) {
       points += config.completionBonus;
     }
@@ -119,6 +147,8 @@ class ReadingScorer {
       language: essay.language,
       totalWords: total,
       correctWords: correct,
+      unclearWords: unclear,
+      strictConfidence: strictConfidence,
       mispronouncedWords: mispronounced,
       missedWords: missed,
       extraWords: extras.length,

@@ -166,6 +166,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get labelCorrect => 'Dibaca dengan betul';
 
   @override
+  String get labelUnclear => 'Tidak jelas kedengaran';
+
+  @override
   String get labelNearlyRight => 'Hampir betul';
 
   @override
@@ -173,6 +176,10 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get labelExtra => 'Perkataan tambahan';
+
+  @override
+  String get unclearHint =>
+      'Mikrofon tidak pasti tentang perkataan ini. Duduk lebih dekat, atau guna fon kepala, biasanya membantu. Perkataan ini masih dikira betul.';
 
   @override
   String get resultHowYouReadIt => 'Cara anda membaca';
@@ -292,6 +299,14 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get settingsReduceMotionSubtitle =>
       'Hentikan titik berdenyut semasa mendengar. Pemasa di sebelahnya masih menunjukkan apa yang berlaku.';
+
+  @override
+  String get settingsStrictConfidence =>
+      'Penandaan ketat untuk perkataan tidak jelas';
+
+  @override
+  String get settingsStrictConfidenceSubtitle =>
+      'Dimatikan secara lalai. Apabila dimatikan, perkataan yang tidak pasti masih mendapat markah penuh, jadi pembaca yang perlahan tidak dihukum. Apabila dihidupkan, perkataan itu kehilangan sebahagian markah, yang dapat menangkap salah sebut yang dibetulkan secara senyap oleh pengecam.';
 
   @override
   String streakDays(int days) {

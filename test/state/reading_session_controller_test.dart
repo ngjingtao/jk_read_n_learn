@@ -22,13 +22,21 @@ const _essay = Essay(
 
 /// Stands in for the microphone without a device.
 class FakeSpeechService implements SpeechRecogniser {
-  FakeSpeechService({this.failure, this.transcript = ''});
+  FakeSpeechService({this.failure, this.transcript = '', this.confidence});
 
   /// When set, `listen` fails with this instead of opening the microphone.
   SpeechFailure? failure;
 
   /// What the recogniser will claim to have heard.
   String transcript;
+
+  /// Confidence reported alongside the transcript. `null` models a platform
+  /// that does not rate its output, which is common and must not be treated as
+  /// "unsure".
+  double? confidence;
+
+  /// Optional per-update confidences, used to exercise the confidence tracker.
+  List<double?>? confidenceSequence;
 
   void Function(SpeechSessionEnd reason)? _onSessionEnd;
   int listenCalls = 0;
@@ -53,13 +61,26 @@ class FakeSpeechService implements SpeechRecogniser {
   @override
   Future<SpeechFailure?> listen({
     required ReadingLanguage language,
-    required void Function(String transcript) onTranscript,
+    required void Function(String transcript, double? confidence) onTranscript,
     void Function(SpeechSessionEnd reason)? onSessionEnd,
   }) async {
     listenCalls++;
     if (failure != null) return failure;
     _onSessionEnd = onSessionEnd;
-    if (transcript.trim().isNotEmpty) onTranscript(transcript);
+
+    final sequence = confidenceSequence;
+    if (sequence != null) {
+      // Model a real session: the transcript grows, one partial at a time.
+      final words = transcript.split(' ');
+      for (var i = 1; i <= words.length; i++) {
+        onTranscript(
+          words.take(i).join(' '),
+          i - 1 < sequence.length ? sequence[i - 1] : null,
+        );
+      }
+    } else if (transcript.trim().isNotEmpty) {
+      onTranscript(transcript, confidence);
+    }
     return null;
   }
 

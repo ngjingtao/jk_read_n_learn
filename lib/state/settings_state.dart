@@ -82,6 +82,7 @@ class SettingsState extends ChangeNotifier {
   static const String _textSizeKey = 'settings.textSize';
   static const String _lineSpacingKey = 'settings.lineSpacing';
   static const String _reduceMotionKey = 'settings.reduceMotion';
+  static const String _strictConfidenceKey = 'settings.strictConfidence';
 
   SharedPreferences? _preferences;
 
@@ -94,6 +95,7 @@ class SettingsState extends ChangeNotifier {
   TextSize _textSize = TextSize.normal;
   LineSpacing _lineSpacing = LineSpacing.normal;
   bool _reduceMotion = false;
+  bool _strictConfidence = false;
   bool _loaded = false;
 
   UiLanguage get language => _language;
@@ -113,6 +115,19 @@ class SettingsState extends ChangeNotifier {
   /// to know what the app is doing.
   bool get reduceMotion => _reduceMotion;
 
+  /// Whether words the recogniser was unsure about lose their full marks.
+  ///
+  /// **Off by default, and that default is a deliberate safety choice.** A child
+  /// reading perfectly into a poor microphone can produce low confidence
+  /// through no fault of their own, and losing marks for that would be unfair
+  /// in a way a six-year-old cannot understand. Left off, unclear words are
+  /// still reported — as information for the parent — but cost nothing.
+  ///
+  /// Turned on, it catches the opposite and worse failure: a recogniser
+  /// auto-correcting a mispronunciation into the written word and awarding full
+  /// marks for a word the child did not say properly.
+  bool get strictConfidenceMarking => _strictConfidence;
+
   bool get isLoaded => _loaded;
 
   /// Reads saved preferences. Safe to call more than once.
@@ -125,6 +140,7 @@ class SettingsState extends ChangeNotifier {
     _textSize = TextSize.fromName(prefs.getString(_textSizeKey));
     _lineSpacing = LineSpacing.fromName(prefs.getString(_lineSpacingKey));
     _reduceMotion = prefs.getBool(_reduceMotionKey) ?? false;
+    _strictConfidence = prefs.getBool(_strictConfidenceKey) ?? false;
 
     _loaded = true;
     notifyListeners();
@@ -173,5 +189,14 @@ class SettingsState extends ChangeNotifier {
 
     _preferences ??= await SharedPreferences.getInstance();
     await _preferences!.setBool(_reduceMotionKey, value);
+  }
+
+  Future<void> setStrictConfidenceMarking(bool value) async {
+    if (value == _strictConfidence) return;
+    _strictConfidence = value;
+    notifyListeners();
+
+    _preferences ??= await SharedPreferences.getInstance();
+    await _preferences!.setBool(_strictConfidenceKey, value);
   }
 }

@@ -4,6 +4,7 @@ import '../models/app_language.dart';
 import '../models/essay.dart';
 import '../models/scoring_models.dart';
 import '../services/permission_service.dart';
+import '../services/scoring/confidence_tracker.dart';
 import '../services/scoring/reading_scorer.dart';
 import '../services/speech_service.dart';
 import '../services/tts_service.dart';
@@ -86,6 +87,12 @@ class ReadingSessionController extends ChangeNotifier {
 
   final Stopwatch _stopwatch = Stopwatch();
 
+  /// Approximate per-word confidence, rebuilt for each attempt.
+  ///
+  /// Recreated per session so confidence from a previous reading can never leak
+  /// into the next one's marks.
+  ConfidenceTracker? _confidence;
+
   ReadingPhase _phase = ReadingPhase.ready;
   String _liveTranscript = '';
   ScoreResult? _result;
@@ -136,6 +143,7 @@ class ReadingSessionController extends ChangeNotifier {
     _liveTranscript = '';
     _result = null;
     _isSpeaking = false;
+    _confidence = ConfidenceTracker(mode: essay.language.tokenMode);
 
     // Ordering matters and is not optional: the microphone and the speaker share
     // an audio session, so leaving text-to-speech running makes the app
@@ -159,8 +167,9 @@ class ReadingSessionController extends ChangeNotifier {
 
     final failure = await speech.listen(
       language: essay.language,
-      onTranscript: (transcript) {
+      onTranscript: (transcript, confidence) {
         _liveTranscript = transcript;
+        _confidence?.add(transcript, confidence);
         _notify();
       },
       // The recogniser closes the session itself once the child stops talking.
@@ -209,6 +218,11 @@ class ReadingSessionController extends ChangeNotifier {
       essay: essay,
       transcript: transcript,
       duration: duration,
+      // Only pass confidences when the platform actually rated anything, so a
+      // device without confidence support produces exactly the old behaviour.
+      spokenWordConfidences:
+          (_confidence?.hasAnyConfidence ?? false) ? _confidence!.confidences : null,
+      strictConfidence: settings.strictConfidenceMarking,
     );
 
     await wallet.credit(

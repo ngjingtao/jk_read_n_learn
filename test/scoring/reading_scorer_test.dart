@@ -182,4 +182,106 @@ void main() {
       expect(result.jkd, const Jkd(550));
     });
   });
+
+  group('confidence-aware marking', () {
+    ScoreResult withConfidence(List<double?>? confidences,
+        {bool strict = false}) {
+      return scorer.score(
+        essay: _englishEssay,
+        transcript: 'The cat sat',
+        duration: const Duration(seconds: 10),
+        spokenWordConfidences: confidences,
+        strictConfidence: strict,
+      );
+    }
+
+    test('high confidence leaves everything correct', () {
+      final result = withConfidence([0.9, 0.9, 0.9]);
+
+      expect(result.correctWords, 3);
+      expect(result.unclearWords, 0);
+      expect(result.accuracy, 1.0);
+    });
+
+    test('a low-confidence match becomes unclear, not wrong', () {
+      final result = withConfidence([0.9, 0.5, 0.9]);
+
+      expect(result.alignment.map((w) => w.status), [
+        WordStatus.correct,
+        WordStatus.unclear,
+        WordStatus.correct,
+      ]);
+      expect(result.alignment[1].display, 'cat');
+      expect(result.alignment[1].confidence, 0.5);
+      expect(result.correctWords, 2);
+      expect(result.unclearWords, 1);
+    });
+
+    test('by default an unclear word costs the child nothing', () {
+      // This is the whole safety property: a bad microphone must never take
+      // marks off a child. Off by default, unclear words are pure feedback.
+      final result = withConfidence([0.9, 0.5, 0.9]);
+
+      expect(result.accuracy, 1.0);
+      expect(result.grade, ScoreGrade.outstanding);
+      expect(result.points, 55, reason: 'identical to a fully confident reading');
+    });
+
+    test('strict marking docks unclear words instead', () {
+      final result = withConfidence([0.9, 0.5, 0.9], strict: true);
+
+      expect(result.strictConfidence, isTrue);
+      expect(result.creditedWords, 2);
+      expect(result.accuracy, closeTo(0.667, 0.01));
+      // 2 full marks + 1 partial + completion bonus.
+      expect(result.points, 2 * 10 + 6 + 25);
+    });
+
+    test('missing confidence is not treated as low confidence', () {
+      // A device that does not rate its output must behave exactly as it did
+      // before confidence support existed.
+      final result = withConfidence(null);
+
+      expect(result.unclearWords, 0);
+      expect(result.correctWords, 3);
+      expect(result.points, 55);
+    });
+
+    test('a short confidence list leaves the rest unknown', () {
+      final result = withConfidence([0.5]);
+
+      expect(result.unclearWords, 1);
+      expect(result.correctWords, 2);
+      expect(result.accuracy, 1.0, reason: 'the other two are simply unrated');
+    });
+
+    test('null entries inside the list are skipped', () {
+      final result = withConfidence([0.9, null, 0.2]);
+
+      expect(result.alignment[1].status, WordStatus.correct);
+      expect(result.alignment[2].status, WordStatus.unclear);
+    });
+
+    test('the threshold is the boundary, not a fuzzy zone', () {
+      final atFloor = withConfidence([0.8, 0.8, 0.8]);
+      final justBelow = withConfidence([0.79, 0.8, 0.8]);
+
+      expect(atFloor.unclearWords, 0, reason: 'at the floor still counts');
+      expect(justBelow.unclearWords, 1);
+    });
+
+    test('a mispronounced word is never reported as unclear', () {
+      // Unclear only applies to words that matched. A garbled word is already
+      // reported as mispronounced, and stacking the two would be confusing.
+      final result = scorer.score(
+        essay: _englishEssay,
+        transcript: 'The cot sat',
+        duration: const Duration(seconds: 10),
+        spokenWordConfidences: [0.9, 0.1, 0.9],
+      );
+
+      expect(result.alignment[1].status, WordStatus.mispronounced);
+      expect(result.unclearWords, 0);
+    });
+  });
 }

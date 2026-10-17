@@ -33,6 +33,15 @@ enum WordStatus {
   /// Heard exactly as written.
   correct,
 
+  /// Heard as written, but the recogniser was not confident.
+  ///
+  /// This is the honest third state. Text-based marking cannot tell a word the
+  /// child read clearly from one the recogniser guessed at — modern recognisers
+  /// auto-correct, so a child saying "fink" can come back as "think" and be
+  /// awarded full marks. Rather than pretending either way, a low-confidence
+  /// match is reported as unclear and the parent is told.
+  unclear,
+
   /// Heard as a recognisably close variant — partial credit.
   mispronounced,
 
@@ -51,6 +60,7 @@ class AlignedWord {
     required this.status,
     required this.similarity,
     this.heard,
+    this.confidence,
   });
 
   /// Position of the target token within [ScoreResult.alignment].
@@ -66,6 +76,10 @@ class AlignedWord {
 
   /// Similarity between [display] and [heard], in the range 0.0 – 1.0.
   final double similarity;
+
+  /// The recogniser's confidence in this word, `0.0` – `1.0`, or `null` when
+  /// the platform did not rate it. See [WordStatus.unclear].
+  final double? confidence;
 
   bool get isGradeable => status != WordStatus.extra;
 }
@@ -84,6 +98,8 @@ class ScoreResult {
     required this.alignment,
     required this.duration,
     required this.transcript,
+    this.unclearWords = 0,
+    this.strictConfidence = false,
     this.extras = const [],
   });
 
@@ -96,6 +112,20 @@ class ScoreResult {
   final int mispronouncedWords;
   final int missedWords;
   final int extraWords;
+
+  /// Words the recogniser heard as written but was not confident about.
+  ///
+  /// A subset of the words *credited* as correct, unless [strictConfidence] is
+  /// on. Reported separately so the result screen can tell a parent that the
+  /// microphone, not the child, is the likely problem.
+  final int unclearWords;
+
+  /// Whether low-confidence words were denied full marks.
+  ///
+  /// Off by default, because a bad microphone must never cost a child marks.
+  /// Turning it on trades that safety for catching auto-corrected
+  /// mispronunciations — see the confidence setting in the app.
+  final bool strictConfidence;
 
   /// Raw score before conversion to currency.
   final int points;
@@ -119,22 +149,31 @@ class ScoreResult {
   /// Exactly what the recogniser heard.
   final String transcript;
 
+  /// Words credited as correct for marking purposes.
+  ///
+  /// In the default (non-strict) mode an unclear word still counts: the child
+  /// may well have read it perfectly, and a poor microphone must not cost them
+  /// marks. In strict mode it does not, which is the whole point of opting in.
+  int get creditedWords =>
+      strictConfidence ? correctWords : correctWords + unclearWords;
+
   /// Strict accuracy: correctly read words over total words, 0.0 – 1.0.
   ///
   /// Deliberately harsh — a word the child mangled does not count — because
   /// this is the number shown as "accuracy" and it should mean what it says.
-  double get accuracy => totalWords == 0 ? 0 : correctWords / totalWords;
+  /// Unclear words count unless strict confidence marking is on.
+  double get accuracy => totalWords == 0 ? 0 : creditedWords / totalWords;
 
   /// Accuracy with partial credit for near-misses, 0.0 – 1.0.
   double get lenientAccuracy => totalWords == 0
       ? 0
-      : (correctWords + mispronouncedWords * 0.5) / totalWords;
+      : (creditedWords + mispronouncedWords * 0.5) / totalWords;
 
   /// Correctly read words per minute.
   double get wordsPerMinute {
     final seconds = duration.inMilliseconds / 1000;
     if (seconds <= 0) return 0;
-    return correctWords / (seconds / 60);
+    return creditedWords / (seconds / 60);
   }
 
   /// A short, encouraging label for the result screen.

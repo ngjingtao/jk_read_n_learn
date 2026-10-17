@@ -111,9 +111,11 @@
     }
   },
   "labelCorrect": "Read correctly",
+  "labelUnclear": "Not clearly heard",
   "labelNearlyRight": "Nearly right",
   "labelMissed": "Missed or wrong",
   "labelExtra": "Extra words added",
+  "unclearHint": "The microphone was not sure about these words. Sitting closer, or using a headset, usually helps. They still count as correct.",
   "resultHowYouReadIt": "How you read it",
   "resultColourLegend": "Green is right, amber is close, red was skipped or said wrongly. Tap a word to hear it again.",
   "extrasTitle": "Words I heard that are not in the passage",
@@ -154,6 +156,8 @@
   "settingsLineSpacingExtraWide": "Extra wide",
   "settingsReduceMotion": "Reduce motion",
   "settingsReduceMotionSubtitle": "Stops the pulsing listening indicator. The timer beside it still shows what is happening.",
+  "settingsStrictConfidence": "Strict marking for unclear words",
+  "settingsStrictConfidenceSubtitle": "Off by default. When off, words the microphone was unsure about still earn full marks, so a quiet reader is never punished. When on, those words lose some marks, which catches mispronunciations the recogniser quietly corrected.",
 
   "streakDays": "{days, plural, =1{1 day streak} other{{days} day streak}}",
   "@streakDays": {

@@ -63,14 +63,18 @@ abstract interface class SpeechRecogniser {
   /// Starts listening.
   ///
   /// [onTranscript] fires repeatedly with the cumulative transcript so the UI
-  /// can show words appearing live. [onSessionEnd] fires if the recogniser
-  /// closes the session on its own — without it, a child who goes quiet leaves
-  /// the app stuck showing "listening" forever with nobody at the microphone.
+  /// can show words appearing live, together with the recogniser's confidence
+  /// in that result. Confidence is `null` when the platform does not rate its
+  /// output — which is common, and must not be treated as "unsure".
+  ///
+  /// [onSessionEnd] fires if the recogniser closes the session on its own —
+  /// without it, a child who goes quiet leaves the app stuck showing
+  /// "listening" forever with nobody at the microphone.
   ///
   /// Returns `null` on success, or the reason it failed.
   Future<SpeechFailure?> listen({
     required ReadingLanguage language,
-    required void Function(String transcript) onTranscript,
+    required void Function(String transcript, double? confidence) onTranscript,
     void Function(SpeechSessionEnd reason)? onSessionEnd,
   });
 
@@ -196,7 +200,7 @@ class SpeechService implements SpeechRecogniser {
   @override
   Future<SpeechFailure?> listen({
     required ReadingLanguage language,
-    required void Function(String transcript) onTranscript,
+    required void Function(String transcript, double? confidence) onTranscript,
     void Function(SpeechSessionEnd reason)? onSessionEnd,
   }) async {
     if (!await initialise()) return SpeechFailure.recogniserUnavailable;
@@ -216,7 +220,13 @@ class SpeechService implements SpeechRecogniser {
       await _stt.listen(
         onResult: (SpeechRecognitionResult result) {
           _transcript = result.recognizedWords;
-          onTranscript(_transcript);
+          // `speech_to_text` reports -1 when it has no rating for this result,
+          // and 0 when there are no alternates at all. Neither means "unsure",
+          // so both are reported as absent.
+          final rated = result.hasConfidenceRating &&
+              result.confidence >= 0 &&
+              result.confidence <= 1;
+          onTranscript(_transcript, rated ? result.confidence : null);
         },
         listenOptions: SpeechListenOptions(
           localeId: localeId,

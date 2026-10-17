@@ -161,6 +161,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get labelCorrect => '读对了';
 
   @override
+  String get labelUnclear => '听得不清楚';
+
+  @override
   String get labelNearlyRight => '差一点';
 
   @override
@@ -168,6 +171,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get labelExtra => '多读的字';
+
+  @override
+  String get unclearHint => '麦克风对这几个字不太确定。坐近一点，或者用耳机，通常会有改善。这些字仍然算读对。';
 
   @override
   String get resultHowYouReadIt => '你读得怎么样';
@@ -280,6 +286,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsReduceMotionSubtitle => '停止聆听时的闪烁圆点。旁边的计时器仍会显示当前状态。';
+
+  @override
+  String get settingsStrictConfidence => '对听不清的字严格评分';
+
+  @override
+  String get settingsStrictConfidenceSubtitle =>
+      '默认关闭。关闭时，麦克风听不清的字仍然拿满分 —— 不会因为读得小声而被扣分。打开后这些字会少拿一些分，好处是能抓出被识别器悄悄纠正掉的发音错误。';
 
   @override
   String streakDays(int days) {

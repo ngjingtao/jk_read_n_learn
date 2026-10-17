@@ -352,6 +352,12 @@ abstract class AppLocalizations {
   /// **'Read correctly'**
   String get labelCorrect;
 
+  /// No description provided for @labelUnclear.
+  ///
+  /// In en, this message translates to:
+  /// **'Not clearly heard'**
+  String get labelUnclear;
+
   /// No description provided for @labelNearlyRight.
   ///
   /// In en, this message translates to:
@@ -369,6 +375,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extra words added'**
   String get labelExtra;
+
+  /// No description provided for @unclearHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The microphone was not sure about these words. Sitting closer, or using a headset, usually helps. They still count as correct.'**
+  String get unclearHint;
 
   /// No description provided for @resultHowYouReadIt.
   ///
@@ -591,6 +603,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stops the pulsing listening indicator. The timer beside it still shows what is happening.'**
   String get settingsReduceMotionSubtitle;
+
+  /// No description provided for @settingsStrictConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Strict marking for unclear words'**
+  String get settingsStrictConfidence;
+
+  /// No description provided for @settingsStrictConfidenceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Off by default. When off, words the microphone was unsure about still earn full marks, so a quiet reader is never punished. When on, those words lose some marks, which catches mispronunciations the recogniser quietly corrected.'**
+  String get settingsStrictConfidenceSubtitle;
 
   /// No description provided for @streakDays.
   ///

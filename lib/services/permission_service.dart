@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:permission_handler/permission_handler.dart' as permissions;
 
 /// What the operating system currently thinks about microphone access.
@@ -43,6 +44,13 @@ class PermissionService implements MicrophonePermissions {
 
   @override
   Future<MicrophoneAccess> microphoneStatus() async {
+    // The browser owns the microphone prompt, and it does not answer the
+    // Permissions API reliably until the user has been asked at least once.
+    // Reporting "denied" here would block the child before the browser ever
+    // got a chance to ask, so on web the question is left to the browser: a
+    // refusal comes back as a recogniser failure instead.
+    if (kIsWeb) return MicrophoneAccess.granted;
+
     try {
       return _map(await permissions.Permission.microphone.status);
     } catch (_) {
@@ -52,6 +60,8 @@ class PermissionService implements MicrophonePermissions {
 
   @override
   Future<MicrophoneAccess> requestMicrophone() async {
+    if (kIsWeb) return MicrophoneAccess.granted;
+
     try {
       return _map(await permissions.Permission.microphone.request());
     } catch (_) {
@@ -60,7 +70,11 @@ class PermissionService implements MicrophonePermissions {
   }
 
   @override
-  Future<bool> openSettings() => permissions.openAppSettings();
+  Future<bool> openSettings() {
+    // There is no per-app settings page to open on the web.
+    if (kIsWeb) return Future.value(false);
+    return permissions.openAppSettings();
+  }
 
   MicrophoneAccess _map(permissions.PermissionStatus status) {
     if (status.isGranted || status.isLimited || status.isProvisional) {
