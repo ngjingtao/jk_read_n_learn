@@ -1,8 +1,11 @@
 server {
     # Render injects PORT. The nginx image substitutes it via envsubst, filtered
     # to PORT only so nginx's own $uri and $host survive.
+    #
+    # Deliberately no `listen [::]` line: containers commonly have IPv6
+    # disabled, and nginx exits rather than warns when it cannot bind an IPv6
+    # socket. Render does not need it.
     listen ${PORT};
-    listen [::]:${PORT};
     server_name _;
 
     root /usr/share/nginx/html;
@@ -14,6 +17,9 @@ server {
     gzip_comp_level 5;
     gzip_min_length 1024;
     gzip_proxied any;
+    # Without this, a shared cache can serve the compressed body to a client
+    # that did not ask for gzip.
+    gzip_vary on;
     gzip_types
         application/javascript
         application/json
